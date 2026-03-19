@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "99l84Olq/nDYItkTp9d7qbluwyibAqt885E0vE8o7pg=",
+  "Source": "DineOS.Api",
+  "BasePath": "_content/DineOS.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

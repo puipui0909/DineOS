@@ -1,0 +1,11 @@
+D:\work\graduation project\DineOS\DineOS.Domain\bin\Debug\net8.0\DineOS.Domain.deps.json
+D:\work\graduation project\DineOS\DineOS.Domain\bin\Debug\net8.0\DineOS.Domain.dll
+D:\work\graduation project\DineOS\DineOS.Domain\bin\Debug\net8.0\DineOS.Domain.pdb
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.AssemblyInfoInputs.cache
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.AssemblyInfo.cs
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.csproj.CoreCompileInputs.cache
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.dll
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\refint\DineOS.Domain.dll
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.pdb
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\ref\DineOS.Domain.dll

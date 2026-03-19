@@ -1,0 +1,15 @@
+D:\work\graduation project\DineOS\DineOS.Application\bin\Debug\net8.0\DineOS.Application.deps.json
+D:\work\graduation project\DineOS\DineOS.Application\bin\Debug\net8.0\DineOS.Application.dll
+D:\work\graduation project\DineOS\DineOS.Application\bin\Debug\net8.0\DineOS.Application.pdb
+D:\work\graduation project\DineOS\DineOS.Application\bin\Debug\net8.0\DineOS.Domain.dll
+D:\work\graduation project\DineOS\DineOS.Application\bin\Debug\net8.0\DineOS.Domain.pdb
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.csproj.AssemblyReference.cache
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.AssemblyInfoInputs.cache
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.AssemblyInfo.cs
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.csproj.CoreCompileInputs.cache
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.A.2A1A8150.Up2Date
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.dll
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\refint\DineOS.Application.dll
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\DineOS.Application.pdb
+D:\work\graduation project\DineOS\DineOS.Application\obj\Debug\net8.0\ref\DineOS.Application.dll

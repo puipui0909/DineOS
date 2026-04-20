@@ -11,6 +11,7 @@ namespace DineOS.Application.Common.Interfaces
         DbSet<User> Users { get; }
         DbSet<Role> Roles { get; }
         DbSet<Table> Tables { get; }
+        DbSet<Category> Categories { get; }
         DbSet<MenuItem> MenuItems { get; }
         DbSet<Order> Orders { get; }
         DbSet<OrderItem> OrderItems { get; }

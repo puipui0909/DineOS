@@ -35,12 +35,5 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
                .WithOne(t => t.Restaurant)
                .HasForeignKey(t => t.RestaurantId)
                .OnDelete(DeleteBehavior.Cascade);
-
-        // TABLE-RESTAURANT (*-1)
-        builder.HasMany(r => r.Tables)
-                .WithOne(t => t.Restaurant)
-                .HasForeignKey(t => t.RestaurantId)
-                .OnDelete(DeleteBehavior.Cascade);
-
     }
 }

@@ -1,3 +1,13 @@
-.vs/ 
-bin/ 
-obj/ 
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.lock.json
+
+# Node / React
+node_modules/
+.env
+dist/
+
+# Visual Studio
+.vs/

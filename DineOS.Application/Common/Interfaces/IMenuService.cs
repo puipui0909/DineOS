@@ -14,8 +14,11 @@ namespace DineOS.Application.Common.Interfaces
         Task<MenuItemDto?> GetByIdAsync(Guid id);
         Task<List<MenuItemDto>> GetByCategoryAsync(Guid categoryId);
 
-        Task<Guid> CreateAsync(string name, decimal price, Guid categoryId);
-        Task UpdateAsync(Guid id, string name, decimal price);
+        Task<Guid> CreateAsync(string name, decimal price, Guid categoryId, string imageUrl);
+        Task UpdateAsync(Guid id, string name, decimal price, string? imageUrl);
         Task DeleteAsync(Guid id);
+        Task ToggleStatusAsync(Guid id);
+
+        Task<List<MenuItemDto>> GetMenuByTableAsync(Guid tableId);
     }
 }

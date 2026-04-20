@@ -48,9 +48,11 @@ public class OrderTests
     {
         var order = Order.Create(Guid.NewGuid());
         var menuItemId = Guid.NewGuid();
-
         order.AddItem(menuItemId, 2, 50);
-        order.RemoveItem(menuItemId);
+
+        var itemId = order.OrderItems.First().Id;
+
+        order.RemoveItem(itemId);
 
         order.OrderItems.Should().BeEmpty();
         order.TotalAmount.Should().Be(0);
@@ -67,15 +69,18 @@ public class OrderTests
     }
 
     [Fact]
-    public void RemoveItem_Should_Throw_When_Order_Closed()
+    public void RemoveItem_Should_Throw_When_Item_Already_Sent()
     {
         var order = Order.Create(Guid.NewGuid());
         var menuItemId = Guid.NewGuid();
 
         order.AddItem(menuItemId, 1, 100);
-        order.Close();
 
-        Action act = () => order.RemoveItem(menuItemId);
+        // giả lập đã gửi bếp
+        var item = order.OrderItems.First();
+        item.MarkAsSent();
+
+        Action act = () => order.RemoveItem(item.Id);
 
         act.Should().Throw<InvalidOperationException>();
     }
@@ -102,15 +107,18 @@ public class OrderTests
     }
 
     [Fact]
-    public void AddItem_Should_Throw_When_Order_Closed()
+    public void AddItem_After_Close_Should_Create_New_Item()
     {
         var order = Order.Create(Guid.NewGuid());
-        order.AddItem(Guid.NewGuid(), 1, 100);
-        order.Close();
+        var menuItemId = Guid.NewGuid();
 
-        Action act = () => order.AddItem(Guid.NewGuid(), 1, 50);
+        order.AddItem(menuItemId, 1, 100);
 
-        act.Should().Throw<InvalidOperationException>();
+        order.OrderItems.First().MarkAsSent();
+
+        order.AddItem(menuItemId, 2, 100);
+
+        order.OrderItems.Count.Should().Be(2);
     }
 
     [Fact]

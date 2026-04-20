@@ -43,8 +43,10 @@ public class AuthService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-
             Expires = DateTime.UtcNow.AddHours(6),
+
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
 
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),

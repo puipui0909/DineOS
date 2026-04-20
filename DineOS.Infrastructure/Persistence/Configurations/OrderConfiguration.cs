@@ -20,6 +20,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Property(o => o.TableId).HasColumnName("table_id").IsRequired();
 
+        builder.Property(o => o.IsActive).HasColumnName("is_active").IsRequired();
+
         // TABLE-ORDER (1-*)
         builder.HasOne(o => o.Table)
                .WithMany(t => t.Orders)

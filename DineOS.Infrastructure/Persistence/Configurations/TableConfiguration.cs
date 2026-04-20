@@ -20,11 +20,9 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
 
         builder.Property(t => t.Status).HasColumnName("status").IsRequired();
 
-        builder.HasOne(t => t.Restaurant).WithMany(r => r.Tables).HasForeignKey(t => t.RestaurantId).OnDelete(DeleteBehavior.Cascade);
-
         // RESTAURANT – TABLE (1–*)
-        builder.HasOne(t => t.Restaurant)        // mỗi Table có 1 Restaurant
-               .WithMany(r => r.Tables)          // 1 Restaurant có nhiều Table
+        builder.HasOne(t => t.Restaurant)        
+               .WithMany(r => r.Tables)          
                .HasForeignKey(t => t.RestaurantId)
                .OnDelete(DeleteBehavior.Cascade);
     }

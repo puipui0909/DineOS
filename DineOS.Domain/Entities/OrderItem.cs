@@ -16,7 +16,7 @@ namespace DineOS.Domain.Entities
 
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public decimal TotalPrice => Quantity * UnitPrice;
 
         // Navigation
@@ -24,6 +24,8 @@ namespace DineOS.Domain.Entities
         public Order? Order { get; private set; }
         public MenuItem? MenuItem { get; private set; }
 
+        //Phân biệt item cũ và mới khi khách gọi thêm
+        public bool IsSentToKitchen { get; private set; } = false;
         private OrderItem() { }
         internal OrderItem(Guid orderId, Guid menuItemId, int quantity, decimal unitPrice)
         {
@@ -38,6 +40,7 @@ namespace DineOS.Domain.Entities
             MenuItemId = menuItemId;
             Quantity = quantity;
             UnitPrice = unitPrice;
+            CreatedAt = DateTime.UtcNow;
 
             // Tận dụng hàm update để validate luôn số lượng
             UpdateQuantity(quantity);
@@ -49,6 +52,10 @@ namespace DineOS.Domain.Entities
                 throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
             Quantity = newQuantity;
+        }
+        public void MarkAsSent()
+        {
+            IsSentToKitchen = true;
         }
     }
 }

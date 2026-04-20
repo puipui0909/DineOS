@@ -125,3 +125,7 @@ D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\Micr
 D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
 D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+D:\work\graduation project\DineOS\DineOS.Application.Tests\obj\Debug\net8.0\DineOS.Application.Tests.sourcelink.json
+D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\Microsoft.AspNetCore.Http.Features.dll
+D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\System.IO.Pipelines.dll
+D:\work\graduation project\DineOS\DineOS.Application.Tests\bin\Debug\net8.0\Microsoft.AspNetCore.Http.Abstractions.dll

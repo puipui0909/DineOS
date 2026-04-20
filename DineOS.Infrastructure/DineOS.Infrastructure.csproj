@@ -24,4 +24,8 @@
     <ProjectReference Include="..\DineOS.Application\DineOS.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

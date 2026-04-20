@@ -28,20 +28,22 @@ namespace DineOS.Application.Services
 
             if (order == null)
                 throw new KeyNotFoundException("Order not found.");
+            if (order.Payment != null)
+                throw new InvalidOperationException("Order already paid.");
+            if (order.Status != OrderStatus.Closed)
+                throw new InvalidOperationException("Order must be closed before payment.");
 
             order.CompletePayment(method);
-
             if (order.Payment != null)
             {
-                _context.Payments.Add(order.Payment);   // QUAN TRỌNG
+                _context.Payments.Add(order.Payment);
             }
-
-            // 3. Persist thay đổi vào Database
             await _context.SaveChangesAsync();
         }
         public async Task<Payment?> GetByOrderIdAsync(Guid orderId)
         {
             return await _context.Payments
+                .Include(p => p.Order)
                 .FirstOrDefaultAsync(x => x.OrderId == orderId);
         }
 

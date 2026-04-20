@@ -11,16 +11,16 @@ namespace DineOS.Application.Common.Interfaces
 {
     public interface IOrderService
     {
-        Task<Guid> OpenTableAsync(Guid tableId);
-        Task AddItemAsync(Guid orderId, Guid menuItemId, int quantity);
-        Task RemoveItemAsync(Guid orderItemId);
+        Task AddItemAsync(Guid orderId, AddOrderItemRequest request);
+        Task RemoveItemAsync(Guid orderId, Guid orderItemId);
         Task CancelAsync(Guid orderId);
         Task CloseAsync(Guid orderId);
-        Task<Order?> GetByIdAsync(Guid orderId);
-        Task<Order?> GetByTableAsync(Guid tableId);
-        Task<List<Order>> GetAllAsync();
+        Task<OrderResponse?> GetByIdAsync(Guid orderId);
+        Task<OrderResponse> GetOrCreateByTableAsync(Guid tableId);
+        Task<List<OrderResponse>> GetAllAsync();
         Task<BillResponse?> GetBillAsync(Guid orderId);
-        Task<List<Order>> GetOrderHistoryAsync();
+        Task<List<OrderHistoryDto>> GetOrderHistoryAsync(string? search, DateTime? fromDate, DateTime? toDate);
+        Task SendToKitchenAsync(Guid orderId);
     }
 
 }

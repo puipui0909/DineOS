@@ -17,7 +17,7 @@ namespace DineOS.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.24")
+                .HasAnnotation("ProductVersion", "8.0.25")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -86,13 +86,16 @@ namespace DineOS.Infrastructure.Migrations
             modelBuilder.Entity("DineOS.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
@@ -116,9 +119,16 @@ namespace DineOS.Infrastructure.Migrations
             modelBuilder.Entity("DineOS.Domain.Entities.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsSentToKitchen")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_sent_to_kitchen");
 
                     b.Property<Guid>("MenuItemId")
                         .HasColumnType("char(36)")
@@ -337,7 +347,7 @@ namespace DineOS.Infrastructure.Migrations
                     b.HasOne("DineOS.Domain.Entities.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MenuItem");

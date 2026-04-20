@@ -23,7 +23,7 @@ namespace DineOS.Domain.Entities
 
         // Navigation
         public Category Category { get; private set; } = null!;
-
+        [System.Text.Json.Serialization.JsonIgnore]
         public ICollection<OrderItem> OrderItems { get; private set; } = new List<OrderItem>();
 
         private MenuItem() { } // EF Core
@@ -35,7 +35,6 @@ namespace DineOS.Domain.Entities
 
             if (price <= 0)
                 throw new ArgumentException("Giá phải lớn hơn 0");
-
             Id = Guid.NewGuid();
             Name = name;
             Price = price;
@@ -43,7 +42,6 @@ namespace DineOS.Domain.Entities
             ImageUrl = imageUrl;
             IsAvailable = true;
         }
-
 
         public void UpdatePrice(decimal newPrice)
         {
@@ -53,7 +51,6 @@ namespace DineOS.Domain.Entities
             Price = newPrice;
         }
 
-
         public void UpdateName(string newName)
         {
             if (string.IsNullOrWhiteSpace(newName))
@@ -62,6 +59,13 @@ namespace DineOS.Domain.Entities
             Name = newName;
         }
 
-
+        public void UpdateImage(string? imageUrl)
+        {
+            ImageUrl = imageUrl;
+        }
+        public void ToggleAvailability()
+        {
+            IsAvailable = !IsAvailable;
+        }
     }
 }

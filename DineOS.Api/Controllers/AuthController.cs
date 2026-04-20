@@ -14,8 +14,10 @@ namespace DineOS.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            Console.WriteLine($"USERNAME: '{request.Username}'");
+            Console.WriteLine($"PASSWORD: '{request.Password}'");
             var token = await _authService.Login(request.Username, request.Password);
 
             if (token == null)

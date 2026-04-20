@@ -17,44 +17,35 @@ namespace DineOS.Api.Controllers
             _orderService = orderService;
         }
 
-        // 1️⃣ Mở bàn
-        [HttpPost("open/{tableId}")]
-        public async Task<IActionResult> OpenTable(Guid tableId)
-        {
-            try
-            {
-                await _orderService.OpenTableAsync(tableId);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.ToString());
-            }
-        }
-
         // 2️⃣ Thêm món
         [HttpPost("{orderId:guid}/items")]
-        public async Task<IActionResult> AddItem(Guid orderId, [FromBody] AddItemRequest request)
+        public async Task<IActionResult> AddItem(Guid orderId, [FromBody] AddOrderItemRequest request)
         {
             // Kiểm tra dữ liệu đầu vào cơ bản
             if (request.Quantity <= 0)
                 return BadRequest("Số lượng phải lớn hơn 0.");
 
-            await _orderService.AddItemAsync(orderId, request.MenuItemId, request.Quantity);
-
-            return Ok(new { Message = "Thêm món vào đơn hàng thành công!" });
+            await _orderService.AddItemAsync(orderId, request);
+            var order = await _orderService.GetByIdAsync(orderId);
+            return Ok(order);
         }
 
         // 4️⃣ Xóa món
         [HttpDelete("{orderId}/items/{orderItemId}")]
-        public async Task<IActionResult> RemoveItem(Guid orderItemId)
+        public async Task<IActionResult> RemoveItem(Guid orderId, Guid orderItemId)
         {
-            await _orderService.RemoveItemAsync(orderItemId);
+            await _orderService.RemoveItemAsync(orderId, orderItemId);
             return Ok();
         }
 
+        [HttpPatch("{orderId}/send-to-kitchen")]
+        public async Task<IActionResult> SendToKitchen(Guid orderId)
+        {
+            await _orderService.SendToKitchenAsync(orderId);
+            return Ok("Sent to kitchen");
+        }
         // 3️⃣ Close Order
-        [HttpPost("{orderId}/close")]
+        [HttpPatch("{orderId}/close")]
         public async Task<IActionResult> Close(Guid orderId)
         {
             await _orderService.CloseAsync(orderId);
@@ -70,7 +61,7 @@ namespace DineOS.Api.Controllers
                 await _orderService.CancelAsync(orderId);
                 return Ok();
             }
-            catch (ApplicationException ex)
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -96,11 +87,7 @@ namespace DineOS.Api.Controllers
         [HttpGet("table/{tableId}")]
         public async Task<IActionResult> GetByTable(Guid tableId)
         {
-            var order = await _orderService.GetByTableAsync(tableId);
-
-            if (order == null)
-                return NotFound();
-
+            var order = await _orderService.GetOrCreateByTableAsync(tableId);
             return Ok(order);
         }
 
@@ -125,9 +112,17 @@ namespace DineOS.Api.Controllers
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> GetHistory()
+        public async Task<IActionResult> GetHistory([FromQuery] string? search, [FromQuery] string? fromDate, [FromQuery] string? toDate)
         {
-            var orders = await _orderService.GetOrderHistoryAsync();
+            DateTime? from = null;
+            if (DateTime.TryParse(fromDate, out var f))
+                from = f;
+
+            DateTime? to = null;
+            if (DateTime.TryParse(toDate, out var t))
+                to = t;
+
+            var orders = await _orderService.GetOrderHistoryAsync(search, from, to);
             return Ok(orders);
         }
     }

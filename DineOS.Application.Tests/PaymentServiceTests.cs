@@ -35,6 +35,7 @@ public class PaymentServiceTests
         var order = Order.Create(table.Id);
         order.AddItem(Guid.NewGuid(), 1, 100);
         order.Close();
+        order.Table?.MarkAsAvailable();
 
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();

@@ -10,16 +10,11 @@ namespace DineOS.Domain.Entities
     public class Table
     {
         public Guid Id { get; private set; }
-
         public int TableNumber { get; private set; }
-
         public string? QrCode { get; private set; }
-
         public TableStatus Status { get; private set; }
-
         // Foreign key
         public Guid RestaurantId { get; set; }
-
         // Navigation
         public Restaurant Restaurant { get; set; } = null!;
         private readonly List<Order> _orders = new();
@@ -42,7 +37,7 @@ namespace DineOS.Domain.Entities
         public void MarkAsOccupied()
         {
             if (Status == TableStatus.Occupied)
-                throw new InvalidOperationException("Table is already occupied.");
+                return;
 
             Status = TableStatus.Occupied;
         }
@@ -53,6 +48,29 @@ namespace DineOS.Domain.Entities
                 return;
 
             Status = TableStatus.Available;
+        }
+        public void MarkAsReserved()
+        {
+            if (Status == TableStatus.Occupied)
+                throw new InvalidOperationException("Cannot reserve occupied table.");
+
+            Status = TableStatus.Reserved;
+        }
+
+        public void MarkAsOutOfService()
+        {
+            Status = TableStatus.OutOfService;
+        }
+
+        public Order CreateOrder()
+        {
+            if (Status != TableStatus.Occupied)
+                throw new InvalidOperationException("Table must be occupied");
+
+            var order = Order.Create(Id);
+            _orders.Add(order);
+
+            return order;
         }
     }
 }

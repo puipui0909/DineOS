@@ -21,4 +21,8 @@
     <ProjectReference Include="..\DineOS.Infrastructure\DineOS.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\images\menu\" />
+  </ItemGroup>
+
 </Project>

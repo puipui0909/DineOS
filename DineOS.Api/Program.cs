@@ -1,17 +1,29 @@
 ﻿using DineOS.Application.Common.Interfaces;
 using DineOS.Application.Services;
 using DineOS.Infrastructure.Persistence;
+using DineOS.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter());
+
+        // ✅ FIX LOOP JSON
+        options.JsonSerializerOptions.ReferenceHandler =
+            ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -39,13 +51,18 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
 // Đăng ký OrderService
+builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IApplicationDbContext, DineOSDbContext>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<ICustomerOrderService, CustomerOrderService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // JWT Configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -69,7 +86,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
 
-        ValidateIssuer = true,
+        ValidateIssuer = false,
         ValidIssuer = jwtIssuer,
 
         ValidateAudience = true,
@@ -90,6 +107,22 @@ builder.Services.AddDbContext<DineOSDbContext>(options =>
     );
 });
 
+//Thêm CORS để cho phép frontend truy cập API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+            //policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5010);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -100,10 +133,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 app.MapControllers();
 
 // Seed dữ liệu mẫu vào cơ sở dữ liệu

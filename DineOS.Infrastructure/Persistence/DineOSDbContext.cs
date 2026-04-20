@@ -25,8 +25,6 @@ namespace DineOS.Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DineOSDbContext).Assembly);
-
-
         }
     }
 }

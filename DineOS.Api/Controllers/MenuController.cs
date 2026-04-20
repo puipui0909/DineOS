@@ -1,5 +1,6 @@
 ﻿using DineOS.Application.Common.Interfaces;
 using DineOS.Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DineOS.Api.Controllers
@@ -46,7 +47,8 @@ namespace DineOS.Api.Controllers
             var id = await _menuService.CreateAsync(
                 request.Name,
                 request.Price,
-                request.CategoryId
+                request.CategoryId,
+                request.ImageUrl
             );
 
             return CreatedAtAction(
@@ -59,8 +61,7 @@ namespace DineOS.Api.Controllers
         [HttpPut("UpdateItem/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMenuItemRequest request)
         {
-            await _menuService.UpdateAsync(id, request.Name, request.Price);
-
+            await _menuService.UpdateAsync(id, request.Name, request.Price, request.ImageUrl);
             return Ok();
         }
 
@@ -69,6 +70,22 @@ namespace DineOS.Api.Controllers
         {
             await _menuService.DeleteAsync(id);
             return Ok();
+        }
+
+        [HttpPatch("toggle/{id}")]
+        public async Task<IActionResult> Toggle(Guid id)
+        {
+            await _menuService.ToggleStatusAsync(id);
+            return Ok();
+        }
+
+        //for customer
+        [AllowAnonymous]
+        [HttpGet("by-table")]
+        public async Task<IActionResult> GetByTable(Guid tableId)
+        {
+            var data = await _menuService.GetMenuByTableAsync(tableId);
+            return Ok(data);
         }
     }
 }

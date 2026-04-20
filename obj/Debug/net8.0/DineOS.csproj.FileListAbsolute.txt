@@ -5,3 +5,4 @@ D:\work\graduation project\DineOS\obj\Debug\net8.0\DineOS.AssemblyInfo.cs
 D:\work\graduation project\DineOS\obj\Debug\net8.0\DineOS.csproj.CoreCompileInputs.cache
 D:\work\graduation project\DineOS\obj\Debug\net8.0\DineOS.MvcApplicationPartsAssemblyInfo.cs
 D:\work\graduation project\DineOS\obj\Debug\net8.0\DineOS.MvcApplicationPartsAssemblyInfo.cache
+D:\work\graduation project\DineOS\obj\Debug\net8.0\DineOS.sourcelink.json

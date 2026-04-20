@@ -9,3 +9,4 @@ D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.d
 D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\refint\DineOS.Domain.dll
 D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.pdb
 D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\ref\DineOS.Domain.dll
+D:\work\graduation project\DineOS\DineOS.Domain\obj\Debug\net8.0\DineOS.Domain.sourcelink.json

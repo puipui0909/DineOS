@@ -14,6 +14,7 @@ namespace DineOS.Domain.Entities
         public OrderStatus Status { get; private set; }
         public decimal TotalAmount { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public bool IsActive { get; set; }
 
         private readonly List<OrderItem> _orderItems = new ();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
@@ -32,43 +33,45 @@ namespace DineOS.Domain.Entities
             Status = OrderStatus.Open;
             TotalAmount = 0;
             CreatedAt = DateTime.UtcNow;
+            IsActive = true;
         }
         public static Order Create(Guid tableId) => new(tableId);
 
         public void AddItem(Guid menuItemId, int quantity, decimal unitPrice)
         {
-            EnsureOpen();
+            if (Status == OrderStatus.Closed || Status == OrderStatus.Paid || Status == OrderStatus.Cancelled)
+                throw new InvalidOperationException("Order cannot be modified.");
+
             if (quantity <= 0)
                 throw new ArgumentException("Số lượng phải lớn hơn 0.");
 
             if (unitPrice < 0)
                 throw new ArgumentException("Giá không hợp lệ.");
 
-            var existingItem = _orderItems.FirstOrDefault(x => x.MenuItemId == menuItemId);
+            var existingItem = _orderItems
+            .FirstOrDefault(x => x.MenuItemId == menuItemId && !x.IsSentToKitchen);
 
             if (existingItem != null)
             {
-                // Cập nhật số lượng nếu món ăn đã tồn tại
                 existingItem.UpdateQuantity(existingItem.Quantity + quantity);
             }
             else
             {
-                // Tạo OrderItem mới với order_id, menu_item_id, quantity, unit_price
                 var item = new OrderItem(Id, menuItemId, quantity, unitPrice);
                 _orderItems.Add(item);
             }
-
             RecalculateTotal();
         }
 
-        public void RemoveItem(Guid menuItemId)
+        public void RemoveItem(Guid orderItemId)
         {
-            EnsureOpen();
-
-            var item = _orderItems.FirstOrDefault(x => x.MenuItemId == menuItemId);
+            var item = _orderItems.FirstOrDefault(x => x.Id == orderItemId);
             if (item == null)
                 throw new InvalidOperationException("Không tìm thấy món ăn trong đơn hàng.");
-
+            if (item.IsSentToKitchen)
+                throw new InvalidOperationException("Không thể xoá món đang được thực hiện.");
+            if (Status == OrderStatus.Paid || Status == OrderStatus.Cancelled)
+                throw new InvalidOperationException("Order không thể được chỉnh sửa.");
             _orderItems.Remove(item);
             RecalculateTotal();
         }
@@ -77,15 +80,37 @@ namespace DineOS.Domain.Entities
         {
             TotalAmount = _orderItems.Sum(x => x.TotalPrice);
         }
+        public void SendToKitchen()
+        {
+            if (Status == OrderStatus.Paid || Status == OrderStatus.Cancelled)
+                throw new InvalidOperationException("Order is not editable.");
+
+            var itemsToSend = _orderItems.Where(i => !i.IsSentToKitchen).ToList();
+
+            if (!itemsToSend.Any())
+                return;
+
+            foreach (var item in itemsToSend)
+            {
+                item.MarkAsSent();
+            }
+            if (Status == OrderStatus.Open)
+            {
+                Status = OrderStatus.InProgress;
+            }
+        }
 
         public void Close()
         {
-            if (Status != OrderStatus.Open)
-                throw new InvalidOperationException("Only open orders can be closed.");
+            if (Status != OrderStatus.Open && Status != OrderStatus.InProgress)
+                throw new InvalidOperationException("Invalid order state.");
+
+            var itemsToSend = _orderItems.Where(i => !i.IsSentToKitchen).ToList();
 
             if (!_orderItems.Any())
                 throw new InvalidOperationException("Cannot close empty order.");
-
+            if (_orderItems.Any(i => !i.IsSentToKitchen))
+                throw new InvalidOperationException("All items must be sent before closing.");
             Status = OrderStatus.Closed;
         }
 
@@ -95,6 +120,7 @@ namespace DineOS.Domain.Entities
                 throw new InvalidOperationException("Only open orders can be cancelled.");
 
             Status = OrderStatus.Cancelled;
+            IsActive = false;
             Table?.MarkAsAvailable();
         }
 
@@ -107,33 +133,21 @@ namespace DineOS.Domain.Entities
                 throw new InvalidOperationException("Order already has a payment.");
 
             var payment = new Payment(this, method);
+
             if (method == PaymentMethod.Cash)
+            {
+                payment.MarkAsPaid();
+            }
+            else if (method == PaymentMethod.Transfer)
             {
                 payment.MarkAsPaid();
             }
 
             Payment = payment;
-            Status = OrderStatus.Paid;
+            Status = OrderStatus.Paid; 
+            IsActive = false;
 
             Table?.MarkAsAvailable();
-        }
-
-        public void RemoveItemById(Guid orderItemId)
-        {
-            EnsureOpen();
-
-            var item = _orderItems.FirstOrDefault(x => x.Id == orderItemId);
-            if (item == null)
-                throw new InvalidOperationException("Item not found.");
-
-            _orderItems.Remove(item);
-            RecalculateTotal();
-        }
-
-        private void EnsureOpen()
-        {
-            if (Status != OrderStatus.Open)
-                throw new InvalidOperationException("Order is not editable.");
         }
     }
 }

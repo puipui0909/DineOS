@@ -19,5 +19,9 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(oi => oi.OrderId).HasColumnName("order_id").HasColumnType("char(36)").IsRequired();
 
         builder.Property(oi => oi.MenuItemId).HasColumnName("menu_item_id").IsRequired();
+
+        builder.Property(oi => oi.CreatedAt).HasColumnName("created_at").HasColumnType("datetime").IsRequired();
+        
+        builder.Property(oi => oi.IsSentToKitchen).HasColumnName("is_sent_to_kitchen").IsRequired();
     }
 }

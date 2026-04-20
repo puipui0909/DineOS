@@ -9,8 +9,7 @@ namespace DineOS.Domain.Enums
     public enum PaymentMethod
     {
         Cash = 1,
-        BankTransfer = 2,
-        EWallet = 3,
-        CreditCard = 4
+        Transfer = 2
+
     }
 }

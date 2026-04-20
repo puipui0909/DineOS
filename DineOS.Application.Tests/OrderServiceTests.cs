@@ -1,4 +1,5 @@
-﻿using DineOS.Application.Services;
+﻿using DineOS.Application.DTOs;
+using DineOS.Application.Services;
 using DineOS.Domain.Entities;
 using DineOS.Domain.Enums;
 using DineOS.Infrastructure.Persistence;
@@ -22,24 +23,6 @@ public class OrderServiceTests
     }
 
     [Fact]
-    public async Task OpenTableAsync_Should_Create_Order()
-    {
-        var restaurantId = Guid.NewGuid();
-        var table = new Table(1, restaurantId);
-
-        _context.Tables.Add(table);
-        await _context.SaveChangesAsync();
-
-        var orderId = await _service.OpenTableAsync(table.Id);
-
-        var order = await _context.Orders.FirstOrDefaultAsync();
-
-        order.Should().NotBeNull();
-        order!.TableId.Should().Be(table.Id);
-        order.Status.Should().Be(OrderStatus.Open);
-    }
-
-    [Fact]
     public async Task AddItemAsync_Should_Add_Item_To_Order()
     {
         var restaurantId = Guid.NewGuid();
@@ -56,16 +39,22 @@ public class OrderServiceTests
         _context.MenuItems.Add(menuItem);
         await _context.SaveChangesAsync();
 
-        var orderId = await _service.OpenTableAsync(table.Id);
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
 
-        await _service.AddItemAsync(orderId, menuItem.Id, 2);
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 2
+        });
 
-        var order = await _context.Orders
-            .Include(o => o.OrderItems)
-            .FirstAsync();
+        var savedOrder = await _context.Orders
+        .Include(o => o.OrderItems)
+        .FirstAsync();
 
-        order.OrderItems.Count.Should().Be(1);
-        order.OrderItems.First().Quantity.Should().Be(2);
+        savedOrder.OrderItems.Count.Should().Be(1);
+        savedOrder.OrderItems.First().Quantity.Should().Be(2);
     }
 
     [Fact]
@@ -85,23 +74,27 @@ public class OrderServiceTests
         _context.MenuItems.Add(menuItem);
         await _context.SaveChangesAsync();
 
-        var orderId = await _service.OpenTableAsync(table.Id);
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
 
-        await _service.AddItemAsync(orderId, menuItem.Id, 1);
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 2
+        });
 
-        var order = await _context.Orders
-            .Include(o => o.OrderItems)
-            .FirstAsync();
+        var savedOrder = await _context.Orders.Include(o => o.OrderItems).FirstAsync();
 
-        var orderItemId = order.OrderItems.First().Id;
+        var orderItemId = savedOrder.OrderItems.First().Id;
 
-        await _service.RemoveItemAsync(orderItemId);
+        await _service.RemoveItemAsync(order.Id, orderItemId);
 
-        order = await _context.Orders
-            .Include(o => o.OrderItems)
-            .FirstAsync();
+        savedOrder = await _context.Orders
+        .Include(o => o.OrderItems)
+        .FirstAsync();
 
-        order.OrderItems.Should().BeEmpty();
+        savedOrder.OrderItems.Should().BeEmpty();
     }
 
     [Fact]
@@ -121,15 +114,201 @@ public class OrderServiceTests
         _context.MenuItems.Add(menuItem);
         await _context.SaveChangesAsync();
 
-        var orderId = await _service.OpenTableAsync(table.Id);
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
 
-        await _service.AddItemAsync(orderId, menuItem.Id, 1);
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 1
+        });
 
-        await _service.CloseAsync(orderId);
+        await _service.CloseAsync(order.Id);
 
-        var order = await _context.Orders.FirstAsync();
+        var savedOrder = await _context.Orders.FirstAsync();
 
-        order.Status.Should().Be(OrderStatus.Closed);
+        savedOrder.Status.Should().Be(OrderStatus.Closed);
+    }
+
+    [Fact]
+    public async Task SendToKitchen_Should_Mark_Items_As_Sent()
+    {
+        var restaurantId = Guid.NewGuid();
+        var table = new Table(1, restaurantId);
+        var categoryId = Guid.NewGuid();
+
+        var menuItem = new MenuItem("Pho", 50000, categoryId);
+
+        _context.Tables.Add(table);
+        _context.MenuItems.Add(menuItem);
+        await _context.SaveChangesAsync();
+
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        // Add item
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 2
+        });
+
+        // Send to kitchen
+        await _service.SendToKitchenAsync(order.Id);
+
+        var savedOrder = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstAsync();
+
+        savedOrder.OrderItems.All(i => i.IsSentToKitchen).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SendToKitchen_Should_Throw_When_No_New_Items()
+    {
+        var restaurantId = Guid.NewGuid();
+        var table = new Table(1, restaurantId);
+        var categoryId = Guid.NewGuid();
+
+        var menuItem = new MenuItem("Pho", 50000, categoryId);
+
+        _context.Tables.Add(table);
+        _context.MenuItems.Add(menuItem);
+        await _context.SaveChangesAsync();
+
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 1
+        });
+
+        await _service.SendToKitchenAsync(order.Id);
+
+        // Gửi lần 2 (không có item mới)
+        Func<Task> act = async () =>
+            await _service.SendToKitchenAsync(order.Id);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task AddItem_After_Send_Should_Create_New_Unsents()
+    {
+        var restaurantId = Guid.NewGuid();
+        var table = new Table(1, restaurantId);
+        var categoryId = Guid.NewGuid();
+
+        var menuItem = new MenuItem("Pho", 50000, categoryId);
+
+        _context.Tables.Add(table);
+        _context.MenuItems.Add(menuItem);
+        await _context.SaveChangesAsync();
+
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        // Lần 1
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 1
+        });
+
+        await _service.SendToKitchenAsync(order.Id);
+
+        // Lần 2 (gọi thêm)
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 2
+        });
+
+        var savedOrder = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstAsync();
+
+        savedOrder.OrderItems.Count.Should().Be(2);
+
+        savedOrder.OrderItems.Count(i => i.IsSentToKitchen).Should().Be(1);
+        savedOrder.OrderItems.Count(i => !i.IsSentToKitchen).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task RemoveItem_Should_Throw_When_Item_Already_Sent()
+    {
+        var restaurantId = Guid.NewGuid();
+        var table = new Table(1, restaurantId);
+        var categoryId = Guid.NewGuid();
+
+        var menuItem = new MenuItem("Pho", 50000, categoryId);
+
+        _context.Tables.Add(table);
+        _context.MenuItems.Add(menuItem);
+        await _context.SaveChangesAsync();
+
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 1
+        });
+
+        await _service.SendToKitchenAsync(order.Id);
+
+        var savedOrder = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstAsync();
+
+        var itemId = savedOrder.OrderItems.First().Id;
+
+        Func<Task> act = async () =>
+            await _service.RemoveItemAsync(order.Id, itemId);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task Close_Should_Not_Change_Sent_Status()
+    {
+        var restaurantId = Guid.NewGuid();
+        var table = new Table(1, restaurantId);
+        var categoryId = Guid.NewGuid();
+
+        var menuItem = new MenuItem("Pho", 50000, categoryId);
+
+        _context.Tables.Add(table);
+        _context.MenuItems.Add(menuItem);
+        await _context.SaveChangesAsync();
+
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        await _service.AddItemAsync(order.Id, new AddOrderItemRequest
+        {
+            MenuItemId = menuItem.Id,
+            Quantity = 1
+        });
+
+        await _service.SendToKitchenAsync(order.Id);
+
+        await _service.CloseAsync(order.Id);
+
+        var savedOrder = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstAsync();
+
+        savedOrder.OrderItems.All(i => i.IsSentToKitchen).Should().BeTrue();
     }
 
     [Fact]
@@ -141,14 +320,17 @@ public class OrderServiceTests
         _context.Tables.Add(table);
         await _context.SaveChangesAsync();
 
-        var orderId = await _service.OpenTableAsync(table.Id);
+        var order = Order.Create(table.Id);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
 
-        await _service.CancelAsync(orderId);
+        await _service.CancelAsync(order.Id);
 
-        var order = await _context.Orders.FirstAsync();
+        var savedOrder = await _context.Orders
+        .FirstAsync(o => o.Id == order.Id);
         var savedTable = await _context.Tables.FirstAsync();
 
-        order.Status.Should().Be(OrderStatus.Cancelled);
+        savedOrder.Status.Should().Be(OrderStatus.Cancelled);
         savedTable.Status.Should().Be(TableStatus.Available);
     }
 
@@ -156,7 +338,11 @@ public class OrderServiceTests
     public async Task AddItemAsync_Should_Throw_When_Order_Not_Found()
     {
         Func<Task> act = async () =>
-            await _service.AddItemAsync(Guid.NewGuid(), Guid.NewGuid(), 1);
+            await _service.AddItemAsync(Guid.NewGuid(), new AddOrderItemRequest
+            {
+                MenuItemId = Guid.NewGuid(),
+                Quantity = 1
+            });
 
         await act.Should().ThrowAsync<Exception>();
     }

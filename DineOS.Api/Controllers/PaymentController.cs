@@ -15,13 +15,19 @@ namespace DineOS.Api.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpPost("{orderId}")]
-        public async Task<IActionResult> Pay(Guid orderId, CreatePaymentRequest request)
+        [HttpPost("{orderId}/pay")]
+        public async Task<IActionResult> Pay(Guid orderId, [FromBody] CreatePaymentRequest request)
         {
+            if (request == null)
+                return BadRequest("Invalid request");
             try
             {
                 await _paymentService.PayAsync(orderId, request.Method);
-                return Ok();
+                return Ok(new
+                {
+                    orderId,
+                    status = "PAID"
+                });
             }
             catch (InvalidOperationException ex)
             {

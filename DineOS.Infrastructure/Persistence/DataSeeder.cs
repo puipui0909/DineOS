@@ -89,18 +89,18 @@ public static class DataSeeder
             var categoryDessert = await context.Categories.FirstAsync(c => c.Name == "Tráng Miệng");
 
             var menuItems = new List<MenuItem>
-        {
-            new MenuItem("Cơm Chiên Dương Châu", 55000, categoryFood.Id),
-            new MenuItem("Phở Bò Đặc Biệt", 65000, categoryFood.Id),
-            new MenuItem("Bún Bò Huế", 60000, categoryFood.Id),
+            {
+                new MenuItem("Cơm Chiên Dương Châu", 55000, categoryFood.Id, "/uploads/images/menu/com_chien_duong_chau.jpg"),
+                new MenuItem("Phở Bò Đặc Biệt", 65000, categoryFood.Id, "/uploads/images/menu/pho-bo.jpg"),
+                new MenuItem("Bún Bò Huế", 60000, categoryFood.Id, "/uploads/images/menu/bun-bo-hue.jpg"),
 
-            new MenuItem("Trà Đào Cam Sả", 35000, categoryDrink.Id),
-            new MenuItem("Cà Phê Sữa Đá", 25000, categoryDrink.Id),
-            new MenuItem("Nước Chanh", 20000, categoryDrink.Id),
+                new MenuItem("Trà Đào Cam Sả", 35000, categoryDrink.Id, "/uploads/images/menu/tra-dao-cam-sa.jpg"),
+                new MenuItem("Cà Phê Sữa Đá", 25000, categoryDrink.Id, "/uploads/images/menu/cafe-sua.jpg"),
+                new MenuItem("Nước Chanh", 20000, categoryDrink.Id, "/uploads/images/menu/nuoc-chanh.jpg"),
 
-            new MenuItem("Bánh Flan", 30000, categoryDessert.Id),
-            new MenuItem("Kem Vanilla", 35000, categoryDessert.Id)
-        };
+                new MenuItem("Bánh Flan", 30000, categoryDessert.Id, "/uploads/images/menu/flan.jpg"),
+                new MenuItem("Kem Vanilla", 35000, categoryDessert.Id, "/uploads/images/menu/Kem-vani.jpg")
+            };
 
             await context.MenuItems.AddRangeAsync(menuItems);
             await context.SaveChangesAsync();

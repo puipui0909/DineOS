@@ -22,6 +22,8 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         builder.Property(mi => mi.CategoryId).HasColumnName("category_id").IsRequired();
 
+        builder.Property(mi => mi.Description).HasColumnName("description").HasMaxLength(255).IsRequired();
+
         // Category – MenuItem (1–*)
         builder.HasOne(mi => mi.Category)
                .WithMany(c => c.MenuItems)

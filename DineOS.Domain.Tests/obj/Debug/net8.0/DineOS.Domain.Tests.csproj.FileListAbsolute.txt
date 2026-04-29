@@ -95,10 +95,10 @@ D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Do
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.AssemblyInfoInputs.cache
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.AssemblyInfo.cs
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.csproj.CoreCompileInputs.cache
+D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.sourcelink.json
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.D.CFC745A2.Up2Date
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.dll
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\refint\DineOS.Domain.Tests.dll
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.pdb
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.genruntimeconfig.cache
 D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\ref\DineOS.Domain.Tests.dll
-D:\work\graduation project\DineOS\DineOS.Domain.Tests\obj\Debug\net8.0\DineOS.Domain.Tests.sourcelink.json

@@ -14,5 +14,9 @@ export const categoryService = {
     getAllPublic: async (tableId) => {
       const res = await axiosPublic.get(`/Category/customer/by-table/${tableId}`);
       return res.data;
+    },
+    delete: async (categoryId) =>{
+      const res = await axiosInstance.delete(`/Category/${categoryId}`)
+      return res.data;
     }
 };

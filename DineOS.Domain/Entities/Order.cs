@@ -121,7 +121,6 @@ namespace DineOS.Domain.Entities
 
             Status = OrderStatus.Cancelled;
             IsActive = false;
-            Table?.MarkAsAvailable();
         }
 
         public void CompletePayment(PaymentMethod method)
@@ -132,22 +131,13 @@ namespace DineOS.Domain.Entities
             if (Payment != null)
                 throw new InvalidOperationException("Order already has a payment.");
 
-            var payment = new Payment(this, method);
+            var payment = new Payment(Id, TotalAmount, method);
 
-            if (method == PaymentMethod.Cash)
-            {
-                payment.MarkAsPaid();
-            }
-            else if (method == PaymentMethod.Transfer)
-            {
-                payment.MarkAsPaid();
-            }
+            payment.MarkAsPaid();
 
             Payment = payment;
-            Status = OrderStatus.Paid; 
+            Status = OrderStatus.Paid;
             IsActive = false;
-
-            Table?.MarkAsAvailable();
         }
     }
 }

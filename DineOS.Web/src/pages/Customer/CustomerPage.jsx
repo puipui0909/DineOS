@@ -12,6 +12,8 @@ import MenuGrid from './components/MenuGrid';
 import ItemDetailModal from './components/ItemDetailModal';
 import CartButton from './components/CartButton';
 import OrderSummary from './components/OrderSummary';
+import ChatBox from './components/ChatBox';
+import ChatToggle from './components/ChatToggle';
 
 export default function CustomerPage() {
   const [searchParams] = useSearchParams();
@@ -25,6 +27,7 @@ export default function CustomerPage() {
   const [openItemModal, setOpenItemModal] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [openChat, setOpenChat] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -108,6 +111,25 @@ export default function CustomerPage() {
 
   return (
     <Box p={2}>
+      {/* 🔥 Chat toggle (góc trên trái) */}
+      <ChatToggle onClick={() => setOpenChat(true)} />
+
+      {/* 🔥 ChatBox */}
+      {openChat && (
+        <>
+          <Box
+            onClick={() => setOpenChat(false)}
+            sx={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.3)',
+              zIndex: 999
+            }}
+          />
+
+          <ChatBox onClose={() => setOpenChat(false)} />
+        </>
+      )}
       <TextField
         fullWidth
         placeholder="Tìm món..."

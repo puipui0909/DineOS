@@ -57,6 +57,12 @@ namespace DineOS.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("category_id");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("description");
+
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")

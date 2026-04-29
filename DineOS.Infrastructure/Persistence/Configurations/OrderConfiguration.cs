@@ -32,11 +32,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
-        // ORDER-PAYMENT (1-1)
+
         builder.HasOne(o => o.Payment)
-            .WithOne(p => p.Order)
-            .HasForeignKey<Payment>(p => p.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(p => p.Order)
+                .HasForeignKey<Payment>(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(o => o.OrderItems)
                .HasField("_orderItems")

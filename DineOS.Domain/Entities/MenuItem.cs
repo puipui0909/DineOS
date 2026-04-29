@@ -18,6 +18,8 @@ namespace DineOS.Domain.Entities
 
         public bool IsAvailable { get; private set; } = true;
 
+        public string Description { get; set; } = string.Empty;
+
         // Foreign key
         public Guid CategoryId { get; private set; }
 
@@ -28,7 +30,7 @@ namespace DineOS.Domain.Entities
 
         private MenuItem() { } // EF Core
 
-        public MenuItem(string name, decimal price, Guid categoryId, string? imageUrl = null)
+        public MenuItem(string name, decimal price, Guid categoryId, string? imageUrl = null, string description = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Tên món không hợp lệ");
@@ -40,6 +42,7 @@ namespace DineOS.Domain.Entities
             Price = price;
             CategoryId = categoryId;
             ImageUrl = imageUrl;
+            Description = description;
             IsAvailable = true;
         }
 

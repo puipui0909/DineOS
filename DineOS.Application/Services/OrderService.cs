@@ -15,6 +15,36 @@ namespace DineOS.Application.Services
             _context = context;
         }
 
+        private OrderResponse MapToResponse(Order order)
+        {
+            return new OrderResponse
+            {
+                Id = order.Id,
+                Status = order.Status.ToString(),
+                IsActive = order.IsActive,
+                CreatedAt = order.CreatedAt,
+
+                Table = new TableDto
+                {
+                    Id = order.Table.Id,
+                    Name = $"Bàn {order.Table.TableNumber}",
+                    Status = order.Table.Status.ToString()
+                },
+
+                Items = order.OrderItems.Select(i => new OrderItemDto
+                {
+                    Id = i.Id,
+                    Name = i.MenuItem != null ? i.MenuItem.Name : "UNKNOWN",
+                    Quantity = i.Quantity,
+                    Price = i.UnitPrice,
+                    CreatedAt = i.CreatedAt,
+                    IsSentToKitchen = i.IsSentToKitchen
+                }).ToList(),
+
+                Total = order.TotalAmount
+            };
+        }
+
         public async Task AddItemAsync(Guid orderId, AddOrderItemRequest request)
         {
             var order = await _context.Orders
@@ -146,35 +176,45 @@ namespace DineOS.Application.Services
                 .Include(o => o.Table)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.MenuItem)
-                .Where(o => o.TableId == tableId && o.IsActive)
-                .OrderByDescending(o => o.CreatedAt)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(o => o.TableId == tableId && o.IsActive);
 
-            if (order == null)
+            if (order != null)
             {
-                var table = await _context.Tables
-                    .FirstOrDefaultAsync(t => t.Id == tableId);
-
-                if (table == null)
-                    throw new Exception("Table not found");
-
-                if (table.Status != TableStatus.Occupied)
+                return new OrderResponse
                 {
-                    table.MarkAsOccupied();
-                }
-
-                order = table.CreateOrder();
-
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                // reload navigation
-                order = await _context.Orders
-                    .Include(o => o.Table)
-                    .Include(o => o.OrderItems)
-                        .ThenInclude(i => i.MenuItem)
-                    .FirstAsync(o => o.Id == order.Id);
+                    Id = order.Id,
+                    Status = order.Status.ToString(),
+                    IsActive = order.IsActive,
+                    Table = new TableDto
+                    {
+                        Id = order.Table.Id,
+                        Name = $"Bàn {order.Table.TableNumber}",
+                        Status = order.Table.Status.ToString()
+                    },
+                    Items = order.OrderItems.Select(i => new OrderItemDto
+                    {
+                        Id = i.Id,
+                        Name = i.MenuItem != null ? i.MenuItem.Name : "UNKNOWN",
+                        Quantity = i.Quantity,
+                        Price = i.UnitPrice,
+                        CreatedAt = i.CreatedAt,
+                        IsSentToKitchen = i.IsSentToKitchen,
+                    }).ToList(),
+                    Total = order.TotalAmount
+                };
             }
+
+            var table = await _context.Tables.FirstOrDefaultAsync(t => t.Id == tableId);
+            if (table == null)
+                throw new Exception("Table not found");
+
+            if (table.Status != TableStatus.Occupied)
+                table.MarkAsOccupied();
+
+            order = table.CreateOrder();
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
 
             return new OrderResponse
             {
@@ -183,22 +223,12 @@ namespace DineOS.Application.Services
                 IsActive = order.IsActive,
                 Table = new TableDto
                 {
-                    Id = order.Table.Id,
-                    Name = $"Bàn {order.Table.TableNumber}",
-                    Status = order.Table.Status.ToString()
+                    Id = table.Id,
+                    Name = $"Bàn {table.TableNumber}",
+                    Status = table.Status.ToString()
                 },
-
-                Items = order.OrderItems.Select(i => new OrderItemDto
-                {
-                    Id = i.Id,
-                    Name = i.MenuItem != null ? i.MenuItem.Name : "UNKNOWN",
-                    Quantity = i.Quantity,
-                    Price = i.UnitPrice,
-                    CreatedAt = i.CreatedAt,
-                    IsSentToKitchen = i.IsSentToKitchen,
-                }).ToList(),
-
-                Total = order.TotalAmount
+                Items = new List<OrderItemDto>(),
+                Total = 0
             };
         }
 

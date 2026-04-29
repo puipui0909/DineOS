@@ -158,16 +158,6 @@ const MainLayout = () => {
             </ListItem>
           ))}
         </List>
-        
-        <Divider sx={{ bgcolor: '#333', mt: 'auto' }} />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon sx={{ color: 'white' }}><SettingsIcon /></ListItemIcon>
-              <ListItemText primary="Settings" />
-            </ListItemButton>
-          </ListItem>
-        </List>
       </Drawer>
 
       {/* 3. MAIN CONTENT AREA */}

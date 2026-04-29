@@ -21,11 +21,11 @@ namespace DineOS.Domain.Entities
         public Order Order { get; private set; } = null!;
 
         private Payment() { }
-        internal Payment(Order order, PaymentMethod method)
+        internal Payment(Guid orderId, decimal amount, PaymentMethod method)
         {
             Id = Guid.NewGuid();
-            OrderId = order.Id;
-            Amount = order.TotalAmount;
+            OrderId = orderId;
+            Amount = amount;
             Method = method;
             Status = PaymentStatus.Pending;
         }

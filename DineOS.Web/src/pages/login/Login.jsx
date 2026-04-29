@@ -141,18 +141,6 @@ const Login = () => {
                 {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </Button>
             </form>
-
-            {/* Demo text */}
-            <Typography
-              variant="caption"
-              sx={{
-                marginTop: 2,
-                color: '#999',
-                textAlign: 'center',
-              }}
-            >
-              Demo: admin / admin123
-            </Typography>
           </Box>
         </Box>
       </Container>

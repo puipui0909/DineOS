@@ -33,9 +33,6 @@ export default function ItemDetailModal({ open, item, onClose, onConfirm }) {
           <Typography>{quantity}</Typography>
           <Button onClick={() => setQuantity((q) => q + 1)}>+</Button>
         </Box>
-
-        <TextField fullWidth placeholder="Ghi chú..." />
-
         <Box mt={2}>
           <Button
             fullWidth

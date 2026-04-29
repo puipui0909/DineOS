@@ -5,7 +5,8 @@ const MenuFilter = ({
   searchText, 
   onSearchChange, 
   selectedCategory, 
-  onCategoryChange 
+  onCategoryChange,
+  onDeleteCategory
 }) => {
   return (
     <Box sx={{

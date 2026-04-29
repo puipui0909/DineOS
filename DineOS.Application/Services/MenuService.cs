@@ -41,7 +41,8 @@ namespace DineOS.Application.Services
                 Price = x.Price,
                 IsAvailable = x.IsAvailable,
                 ImageUrl = x.ImageUrl,
-                CategoryId = x.CategoryId
+                CategoryId = x.CategoryId,
+                Description = x.Description
             })
             .ToListAsync();
         }
@@ -57,7 +58,8 @@ namespace DineOS.Application.Services
                     Name = x.Name,
                     Price = x.Price,
                     IsAvailable = x.IsAvailable,
-                    CategoryId = x.CategoryId
+                    CategoryId = x.CategoryId,
+                    Description = x.Description
                 })
                 .FirstOrDefaultAsync();
         }
@@ -74,12 +76,13 @@ namespace DineOS.Application.Services
                     Name = x.Name,
                     Price = x.Price,
                     IsAvailable = x.IsAvailable,
-                    CategoryId = x.CategoryId
+                    CategoryId = x.CategoryId,
+                    Description = x.Description
                 })
                 .ToListAsync();
         }
 
-        public async Task<Guid> CreateAsync(string name, decimal price, Guid categoryId, string imageUrl)
+        public async Task<Guid> CreateAsync(string name, decimal price, Guid categoryId, string imageUrl, string description)
         {
             // 🔥 Lấy category
             var category = await _context.Categories
@@ -93,7 +96,8 @@ namespace DineOS.Application.Services
                 name,
                 price,
                 categoryId,
-                imageUrl
+                imageUrl,
+                description
             );
 
             _context.MenuItems.Add(item);
@@ -102,7 +106,7 @@ namespace DineOS.Application.Services
             return item.Id;
         }
 
-        public async Task UpdateAsync(Guid id, string name, decimal price, string? imageUrl)
+        public async Task UpdateAsync(Guid id, string name, decimal price, string? imageUrl, string? description)
         {
             var restaurantId = GetRestaurantId();
 
@@ -118,6 +122,7 @@ namespace DineOS.Application.Services
             {
                 item.UpdateImage(imageUrl);
             }
+
 
             await _context.SaveChangesAsync();
         }
@@ -168,7 +173,8 @@ namespace DineOS.Application.Services
                     Price = x.Price,
                     CategoryId = x.CategoryId,
                     IsAvailable = x.IsAvailable,
-                    ImageUrl = x.ImageUrl
+                    ImageUrl = x.ImageUrl,
+                    Description = x.Description
                 })
                 .ToListAsync();
         }

@@ -48,7 +48,8 @@ namespace DineOS.Api.Controllers
                 request.Name,
                 request.Price,
                 request.CategoryId,
-                request.ImageUrl
+                request.ImageUrl,
+                request.Description
             );
 
             return CreatedAtAction(
@@ -61,7 +62,7 @@ namespace DineOS.Api.Controllers
         [HttpPut("UpdateItem/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMenuItemRequest request)
         {
-            await _menuService.UpdateAsync(id, request.Name, request.Price, request.ImageUrl);
+            await _menuService.UpdateAsync(id, request.Name, request.Price, request.ImageUrl, request.Description);
             return Ok();
         }
 

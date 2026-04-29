@@ -2,6 +2,7 @@
 using DineOS.Application.DTOs;
 using DineOS.Domain.Entities;
 using DineOS.Domain.Enums;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DineOS.Application.Services
@@ -9,10 +10,21 @@ namespace DineOS.Application.Services
     public class OrderService : IOrderService
     {
         private readonly IApplicationDbContext _context;
+        private readonly IHubContext<Hub> _hubContext;
 
-        public OrderService(IApplicationDbContext context)
+        public OrderService(IApplicationDbContext context, IHubContext<Hub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
+        }
+        private async Task BroadcastOrder(Guid orderId)
+        {
+            var updatedOrder = await GetByIdAsync(orderId);
+            if (updatedOrder != null)
+            {
+                // Gọi tên hàm bằng chuỗi "OrderUpdated"
+                await _hubContext.Clients.All.SendAsync("OrderUpdated", updatedOrder);
+            }
         }
 
         private OrderResponse MapToResponse(Order order)
@@ -65,6 +77,7 @@ namespace DineOS.Application.Services
             );
 
             await _context.SaveChangesAsync();
+            await BroadcastOrder(orderId);
         }
 
 
@@ -82,6 +95,7 @@ namespace DineOS.Application.Services
             try
             {
                 await _context.SaveChangesAsync();
+                await BroadcastOrder(orderId);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -102,6 +116,7 @@ namespace DineOS.Application.Services
 
             order.Close();
             await _context.SaveChangesAsync();
+            await BroadcastOrder(orderId);
         }
         public async Task SendToKitchenAsync(Guid orderId)
         {
@@ -115,6 +130,7 @@ namespace DineOS.Application.Services
             order.SendToKitchen();
 
             await _context.SaveChangesAsync();
+            await BroadcastOrder(orderId);
         }
 
         // 6️⃣ Hủy order
@@ -129,6 +145,7 @@ namespace DineOS.Application.Services
 
             order.Cancel();
             await _context.SaveChangesAsync();
+            await BroadcastOrder(orderId);
         }
 
         public async Task<OrderResponse?> GetByIdAsync(Guid orderId)
@@ -215,6 +232,7 @@ namespace DineOS.Application.Services
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+
 
             return new OrderResponse
             {

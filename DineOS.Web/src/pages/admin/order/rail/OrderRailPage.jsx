@@ -2,11 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { Box, Grid, CircularProgress } from '@mui/material';
 import OrderColumn from './OrderColumn';
 import { orderService } from '../../../../api/orderService';
+import { startOrderRealtime } from '../../../../api/orderRealtime';
 
 export default function OrderRailPage() {
-  const [orders, setOrders] = useState([]); 
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // =========================
+  // FETCH INITIAL DATA
+  // =========================
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
@@ -29,7 +33,6 @@ export default function OrderRailPage() {
         }));
 
       setOrders(safe);
-
     } catch (err) {
       console.error('Fetch orders error:', err);
       setOrders([]);
@@ -38,10 +41,64 @@ export default function OrderRailPage() {
     }
   }, []);
 
+  // =========================
+  // LOAD LẦN ĐẦU
+  // =========================
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
+  // =========================
+  // REALTIME SIGNALR
+  // =========================
+  useEffect(() => {
+    startOrderRealtime(
+
+      // 🟢 NEW ORDER
+      (newOrder) => {
+        setOrders(prev => {
+          if (!newOrder) return prev;
+
+          const normalized = {
+            ...newOrder,
+            status: newOrder.status?.toUpperCase(),
+            items: newOrder.items ?? [],
+            table: newOrder.table ?? {},
+          };
+
+          return [normalized, ...prev];
+        });
+      },
+
+      // 🟡 UPDATE ORDER
+      (updatedOrder) => {
+        setOrders(prev => {
+          if (!updatedOrder) return prev;
+
+          const normalized = {
+            ...updatedOrder,
+            status: updatedOrder.status?.toUpperCase(),
+            items: updatedOrder.items ?? [],
+            table: updatedOrder.table ?? {},
+          };
+
+          const exists = prev.some(o => o.id === normalized.id);
+
+          if (!exists) {
+            return [normalized, ...prev];
+          }
+
+          return prev.map(o =>
+            o.id === normalized.id ? normalized : o
+          );
+        });
+      }
+    );
+  }, []);
+
+  // =========================
+  // LOADING UI
+  // =========================
   if (loading && orders.length === 0) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
@@ -49,6 +106,13 @@ export default function OrderRailPage() {
       </Box>
     );
   }
+
+  // =========================
+  // FILTER ĐÚNG LOGIC
+  // =========================
+  const openOrders = orders.filter(o => o.status === "OPEN");
+  const inProgressOrders = orders.filter(o => o.status === "INPROGRESS");
+  const closedOrders = orders.filter(o => o.status === "CLOSED");
 
   return (
     <Box p={2}>
@@ -59,7 +123,7 @@ export default function OrderRailPage() {
           <OrderColumn
             title="OPEN"
             status="OPEN"
-            orders={orders.filter(o => o.isActive)}
+            orders={openOrders}
             onReload={fetchOrders}
           />
         </Grid>
@@ -69,7 +133,7 @@ export default function OrderRailPage() {
           <OrderColumn
             title="IN PROGRESS"
             status="INPROGRESS"
-            orders={orders.filter(o => o.isActive)}
+            orders={inProgressOrders}
             onReload={fetchOrders}
           />
         </Grid>
@@ -79,7 +143,7 @@ export default function OrderRailPage() {
           <OrderColumn
             title="CLOSED"
             status="CLOSED"
-            orders={orders}
+            orders={closedOrders}
             onReload={fetchOrders}
           />
         </Grid>

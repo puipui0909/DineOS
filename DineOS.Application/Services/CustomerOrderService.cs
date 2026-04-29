@@ -1,6 +1,7 @@
 ﻿using DineOS.Application.Common.Interfaces;
 using DineOS.Application.DTOs;
 using DineOS.Domain.Entities;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,11 @@ namespace DineOS.Application.Services
     public class CustomerOrderService : ICustomerOrderService
     {
         private readonly IApplicationDbContext _context;
-
-        public CustomerOrderService(IApplicationDbContext context)
+        private readonly IHubContext<Hub> _hubContext;
+        public CustomerOrderService(IApplicationDbContext context, IHubContext<Hub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<OrderResponse?> GetByTableAsync(Guid tableId)
@@ -82,6 +84,12 @@ namespace DineOS.Application.Services
             }
 
             await _context.SaveChangesAsync();
+            var response = Map(order);
+
+            // NEW ORDER → push riêng
+            await _hubContext.Clients.All.SendAsync("NewOrder", response);
+
+            return response;
 
             return Map(order);
         }

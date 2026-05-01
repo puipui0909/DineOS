@@ -22,7 +22,6 @@ builder.Services.AddControllers()
     });
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -67,6 +66,8 @@ builder.Services.AddScoped<IRealtimeService, SignalRRealtimeService>();
 
 // JWT Configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+    throw new Exception("JWT Key is missing");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
@@ -126,35 +127,43 @@ builder.Services.AddDbContext<DineOSDbContext>(options =>
 //Thêm CORS để cho phép frontend truy cập API
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
+    options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins("http://localhost:5173",
-                    "http://192.168.1.161:5173")
+            policy.WithOrigins(
+                    "https://dineos.vercel.app"
+                    //"http://localhost:5173",
+                    //"http://192.168.1.161:5173"
+                    )
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5010);
-});
+
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(5010);
+//});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
+app.UseRouting();
 
 app.UseCors("AllowFrontend");
-app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapHub<OrderHub>("/orderHub");
-app.UseHttpsRedirection();
+
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.MapControllers();
 
@@ -162,7 +171,10 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DineOSDbContext>();
-    await DataSeeder.SeedAsync(context);
+    if (!context.Tables.Any()) // hoặc entity bất kỳ
+    {
+        await DataSeeder.SeedAsync(context);
+    }
 }
 
 

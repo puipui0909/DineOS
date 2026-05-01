@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DineOS.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d47df0b8af04b293bd3431ab40539227ecedc32")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8fc496f5c962b36dfa99761ec4b68a04661b838c")]
 [assembly: System.Reflection.AssemblyProductAttribute("DineOS.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DineOS.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

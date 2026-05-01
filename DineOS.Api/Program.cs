@@ -1,4 +1,5 @@
 ﻿using DineOS.Api.Hubs;
+using DineOS.Api.Services;
 using DineOS.Application.Common.Interfaces;
 using DineOS.Application.Services;
 using DineOS.Infrastructure.Persistence;
@@ -62,6 +63,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ICustomerOrderService, CustomerOrderService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddHttpClient<IAiService, AiService>();
+builder.Services.AddScoped<IRealtimeService, SignalRRealtimeService>();
 
 // JWT Configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -85,7 +87,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
 
-        ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidIssuer = jwtIssuer,
 
         ValidateAudience = true,
@@ -93,6 +95,21 @@ builder.Services.AddAuthentication(options =>
 
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            // Nếu request gửi đến Hub thì lấy token từ query string
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/orderHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -112,7 +129,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins("http://localhost:5173",
+                    "http://192.168.1.161:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -132,10 +150,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
-app.MapHub<OrderHub>("/orderHub");
-app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<OrderHub>("/orderHub");
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.MapControllers();
 

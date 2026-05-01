@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Box, Grid, CircularProgress } from '@mui/material';
 import OrderColumn from './OrderColumn';
 import { orderService } from '../../../../api/orderService';
-import { startOrderRealtime } from '../../../../api/orderRealtime';
+import { startOrderRealtime, stopOrderRealtime } from '../../../../api/orderRealtime';
 
 export default function OrderRailPage() {
   const [orders, setOrders] = useState([]);
@@ -24,7 +24,7 @@ export default function OrderRailPage() {
       }
 
       const safe = (data ?? [])
-        .filter(o => o)
+        .filter(o => o && o.isActive)
         .map(o => ({
           ...o,
           status: o.status?.toUpperCase(),
@@ -47,54 +47,57 @@ export default function OrderRailPage() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+  
+  useEffect(() => {
+    console.log("🚀 INIT REALTIME");
+
+    startOrderRealtime(
+      null, // onNewOrder (bạn chưa dùng)
+      (updatedOrder) => {
+        console.log("🔥 REALTIME HIT:", updatedOrder);
+
+        setOrders(prev => {
+          const index = prev.findIndex(o => o.id === updatedOrder.id);
+
+          if (index === -1) return [updatedOrder, ...prev];
+
+          const updated = [...prev];
+          updated[index] = updatedOrder;
+          return updated;
+        });
+      }
+    );
+
+  }, []);
 
   // =========================
   // REALTIME SIGNALR
   // =========================
-  useEffect(() => {
-    startOrderRealtime(
-
-      // 🟢 NEW ORDER
-      (newOrder) => {
-        setOrders(prev => {
-          if (!newOrder) return prev;
-
-          const normalized = {
-            ...newOrder,
-            status: newOrder.status?.toUpperCase(),
-            items: newOrder.items ?? [],
-            table: newOrder.table ?? {},
-          };
-
-          return [normalized, ...prev];
-        });
-      },
-
-      // 🟡 UPDATE ORDER
-      (updatedOrder) => {
-        setOrders(prev => {
-          if (!updatedOrder) return prev;
-
-          const normalized = {
-            ...updatedOrder,
-            status: updatedOrder.status?.toUpperCase(),
-            items: updatedOrder.items ?? [],
-            table: updatedOrder.table ?? {},
-          };
-
-          const exists = prev.some(o => o.id === normalized.id);
-
-          if (!exists) {
-            return [normalized, ...prev];
-          }
-
-          return prev.map(o =>
-            o.id === normalized.id ? normalized : o
-          );
-        });
-      }
-    );
+  const handleRealtimeUpdate = useCallback((updatedOrder) => {
+    console.log("🔥 RAIL PAGE UPDATE:", updatedOrder.id);
+    setOrders(prev => {
+      const normalized = {
+        ...updatedOrder,
+        status: updatedOrder.status?.toString().toUpperCase().replace(/\s/g, ''),
+        items: updatedOrder.items ?? [],
+        table: updatedOrder.table ?? {},
+      };
+      const index = prev.findIndex(o => o.id === normalized.id);
+      if (index === -1) return [normalized, ...prev];
+      const updated = [...prev];
+      updated[index] = normalized;
+      return updated;
+    });
   }, []);
+  useEffect(() => {
+    // Chúng ta chỉ cần nghe UpdateOrder ở trang này, NewOrder đã có Layout lo hoặc fetch đầu trang lo
+    startOrderRealtime(null, handleRealtimeUpdate);
+
+    return () => {
+      console.log("Cleanup Rail Page Realtime");
+      stopOrderRealtime(null, handleRealtimeUpdate);
+    };
+  }, [handleRealtimeUpdate]);
 
   // =========================
   // LOADING UI
@@ -110,9 +113,9 @@ export default function OrderRailPage() {
   // =========================
   // FILTER ĐÚNG LOGIC
   // =========================
-  const openOrders = orders.filter(o => o.status === "OPEN");
-  const inProgressOrders = orders.filter(o => o.status === "INPROGRESS");
-  const closedOrders = orders.filter(o => o.status === "CLOSED");
+  const openOrders = orders;
+  const inProgressOrders = orders;
+  const closedOrders = orders;
 
   return (
     <Box p={2}>

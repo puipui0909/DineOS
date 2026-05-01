@@ -53,9 +53,21 @@ export default function OrderCard({ order, onReload }) {
               x{item.quantity} {item.name}
             </Typography>
 
-            <Typography fontSize={12} color="green">
-              NEW
-            </Typography>
+            <Button
+              size="small"
+              color="error"
+              onClick={async () => {
+                try {
+                  await orderService.staff.removeItem(order.id, item.id);
+                  onReload(); // fallback nếu realtime fail
+                } catch (err) {
+                  console.error(err);
+                  alert("Không thể xoá món này");
+                }
+              }}
+            >
+              X
+            </Button>
           </Box>
         ))}
 

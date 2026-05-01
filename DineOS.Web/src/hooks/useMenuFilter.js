@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
+import { normalizeText } from '../utils/stringUtils';
 
 export const useMenuFilter = (menuItems, searchText, selectedCategory) => {
   const filteredMenu = useMemo(() => {
     return menuItems.filter(item => {
-      const matchSearch = item.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
+      const matchSearch = normalizeText(item.name)
+        .includes(normalizeText(searchText));
 
       const matchCategory =
         selectedCategory === 'All' ||

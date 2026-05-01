@@ -121,6 +121,10 @@ namespace DineOS.Domain.Entities
 
             Status = OrderStatus.Cancelled;
             IsActive = false;
+            if (Table != null)
+            {
+                Table.MarkAsAvailable();
+            }
         }
 
         public void CompletePayment(PaymentMethod method)

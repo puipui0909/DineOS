@@ -85,6 +85,10 @@ export default function CustomerPage() {
     setOpenItemModal(false);
   };
 
+  const handleRemoveItem = (id) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
+
   const handleSendToKitchen = async () => {
     try {
       setLoading(true);
@@ -176,9 +180,11 @@ export default function CustomerPage() {
 
       <OrderSummary
         open={openCart}
-        order={{ orderItems: cartItems }}
+        order={order}
+        cartItems={cartItems} 
         onClose={() => setOpenCart(false)}
         onSend={handleSendToKitchen}
+        onRemoveItem={handleRemoveItem}
       />
     </Box>
   );

@@ -1,22 +1,54 @@
+// orderRealtime.js
 import * as signalR from "@microsoft/signalr";
 
-let connection = null;
+export let connection = null;
 
-export const startOrderRealtime = async (onReceive) => {
-  connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://192.168.1.161:5010/orderHub")
-    .withAutomaticReconnect()
-    .build();
+// Chuyển thành Set để tránh trùng lặp hàm
+const newOrderListeners = new Set();
+const updateOrderListeners = new Set();
 
-  connection.on("ReceiveOrderUpdate", (order) => {
-    onReceive(order);
-  });
+export const startOrderRealtime = async (onNewOrder, onUpdateOrder) => {
+  // Thêm callback vào danh sách thay vì ghi đè
+  if (onNewOrder) newOrderListeners.add(onNewOrder);
+  if (onUpdateOrder) updateOrderListeners.add(onUpdateOrder);
 
-  await connection.start();
+  if (connection && (connection.state === "Connected" || connection.state === "Connecting")) {
+    return;
+  }
+
+  if (!connection) {
+    connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://192.168.1.161:5010/orderHub")
+      .withAutomaticReconnect([0, 2000, 5000, 10000])
+      .build();
+
+    connection.on("OrderCreated", (order) => {
+      newOrderListeners.forEach(callback => callback(order));
+    });
+
+    connection.on("OrderUpdated", (order) => {
+      updateOrderListeners.forEach(callback => callback(order));
+    });
+    
+    // Thêm log để theo dõi số lượng listener cho đồ án
+    console.log(`📡 SignalR Listeners: New(${newOrderListeners.size}) Update(${updateOrderListeners.size})`);
+  }
+
+  try {
+    await connection.start();
+    console.log("✅ SignalR Connected");
+  } catch (err) {
+    console.error("❌ SignalR Start Error:", err);
+  }
 };
 
-export const stopOrderRealtime = async () => {
-  if (connection) {
-    await connection.stop();
+// Quan trọng: Phải có hàm để gỡ callback khi component unmount
+export const stopOrderRealtime = (onNewOrder, onUpdateOrder) => {
+  if (onNewOrder) newOrderListeners.delete(onNewOrder);
+  if (onUpdateOrder) updateOrderListeners.delete(onUpdateOrder);
+  
+  if (newOrderListeners.size === 0 && updateOrderListeners.size === 0 && connection) {
+     // Chỉ đóng kết nối nếu không còn ai nghe nữa (tùy bạn quyết định)
+     // connection.stop(); 
   }
 };

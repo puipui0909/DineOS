@@ -53,6 +53,20 @@ export default function OrderPage() {
     init();
   }, [tableId]);
 
+  useEffect(() => {
+    const handleRealtimeReload = (event) => {
+      const updatedOrder = event.detail;
+      // Nếu đơn hàng đang xem trùng với đơn hàng vừa cập nhật, load lại data
+      if (order && updatedOrder.id === order.id) {
+        console.log("📥 Cập nhật dữ liệu đơn hàng hiện tại...");
+        fetchOrder(); 
+      }
+    };
+
+    window.addEventListener("RELOAD_ORDER_DATA", handleRealtimeReload);
+    return () => window.removeEventListener("RELOAD_ORDER_DATA", handleRealtimeReload);
+  }, [order?.id]); // Lắng nghe theo ID đơn hàng
+
   const fetchOrder = async () => {
     try {
       setLoading(true);
@@ -129,6 +143,23 @@ export default function OrderPage() {
   };
   if (loading) return <Typography>Loading...</Typography>;
   if (!order) return <Typography>Loading...</Typography>;
+
+  const handleCancelOrder = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn huỷ đơn này không?")) {
+      try {
+        setLoading(true);
+        await orderService.staff.cancelOrder(order.id);
+        
+        // Sau khi huỷ thành công, điều hướng về trang quản lý bàn
+        navigate('/admin/table'); 
+      } catch (err) {
+        console.error("Lỗi khi huỷ đơn:", err);
+        alert(err.response?.data || "Không thể huỷ đơn hàng này.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const handlePayment = async () => {
   try {
@@ -342,8 +373,18 @@ export default function OrderPage() {
                 }}
               >
                 Đóng đơn
-                
               </Button>
+              <Divider sx={{ my: 1, borderStyle: 'dashed' }} />
+              {(normalizedStatus === 'OPEN') && (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="error"
+                  onClick={handleCancelOrder}
+                >
+                  Huỷ đơn
+                </Button>
+              )}
 
             </CardContent>
           </Card>

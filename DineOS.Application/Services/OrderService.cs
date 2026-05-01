@@ -10,12 +10,12 @@ namespace DineOS.Application.Services
     public class OrderService : IOrderService
     {
         private readonly IApplicationDbContext _context;
-        private readonly IHubContext<Hub> _hubContext;
+        private readonly IRealtimeService _realtime;
 
-        public OrderService(IApplicationDbContext context, IHubContext<Hub> hubContext)
+        public OrderService(IApplicationDbContext context, IRealtimeService realtime)
         {
             _context = context;
-            _hubContext = hubContext;
+            _realtime = realtime;
         }
         private async Task BroadcastOrder(Guid orderId)
         {
@@ -23,7 +23,7 @@ namespace DineOS.Application.Services
             if (updatedOrder != null)
             {
                 // Gọi tên hàm bằng chuỗi "OrderUpdated"
-                await _hubContext.Clients.All.SendAsync("OrderUpdated", updatedOrder);
+                await _realtime.BroadcastOrderUpdated(updatedOrder);
             }
         }
 

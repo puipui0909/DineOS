@@ -1,58 +1,87 @@
-import {
-  Drawer,
-  Box,
-  Typography,
-  Button,
-  Divider
-} from '@mui/material';
+import { Drawer, Box, Typography, Button, Divider, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+export default function OrderSummary({ open, order, cartItems = [], onClose, onSend, onRemoveItem }) {
+  // 1. Lấy món đã được xác nhận (sent) từ API (Clean Architecture: order.items)
+  const confirmedItems = order?.items || [];
+  
+  // 2. Lấy món đang nằm trong giỏ hàng (chưa gửi bếp)
+  const pendingItems = cartItems || [];
 
-export default function OrderSummary({ open, order, onClose, onSend }) {
-  const items = order?.orderItems || [];
-
-  const total = items.reduce(
-    (sum, i) => sum + i.price * i.quantity,
-    0
-  );
+  // 3. Tính tổng cộng cả 2 nguồn
+  const total =
+    confirmedItems.reduce((s, i) => s + (i.price * i.quantity || 0), 0) +
+    pendingItems.reduce((s, i) => s + (i.price * i.quantity || 0), 0);
 
   return (
     <Drawer anchor="bottom" open={open} onClose={onClose}>
-      <Box p={2}>
-        <Typography variant="h6">Thông tin đơn</Typography>
+      <Box p={3} sx={{ maxHeight: '85vh', overflowY: 'auto' }}>
+        <Typography variant="h6" fontWeight="bold" mb={2}>Chi tiết đơn hàng</Typography>
 
-        {items.length === 0 && (
-          <Typography mt={2}>Chưa có món nào</Typography>
+        {/* HIỂN THỊ MÓN ĐÃ GỌI (MÀU XANH) */}
+        {confirmedItems.length > 0 && (
+          <Box mb={2}>
+            <Typography variant="subtitle2" color="primary" gutterBottom>Đã gửi bếp:</Typography>
+            {confirmedItems.map((item, idx) => (
+              <Box key={`confirmed-${idx}`} display="flex" justifyContent="space-between" mb={1}>
+                <Typography>x{item.quantity} {item.name}</Typography>
+                <Typography>{(item.price * item.quantity).toLocaleString()}đ</Typography>
+              </Box>
+            ))}
+          </Box>
         )}
 
-        {items.map((item, index) => (
-          <Box key={index} display="flex" justifyContent="space-between" mt={1}>
-            <Typography>
-              {item.name} x{item.quantity}
-            </Typography>
+        {confirmedItems.length > 0 && pendingItems.length > 0 && <Divider sx={{ my: 2, borderStyle: 'dashed' }} />}
 
-            <Typography>
-              {(item.price * item.quantity).toLocaleString()}đ
-            </Typography>
+        {/* HIỂN THỊ GIỎ HÀNG HIỆN TẠI (MÀU ĐẬM/NGHIÊNG) */}
+        {pendingItems.length > 0 && (
+          <Box mb={2}>
+            <Typography variant="subtitle2" color="secondary" gutterBottom>Món mới chọn:</Typography>
+            {pendingItems.map((item, idx) => (
+              <Box key={`pending-${idx}`} display="flex" justifyContent="space-between" mb={1}>
+                <Typography sx={{ fontStyle: 'italic', fontWeight: 500 }}>
+                  x{item.quantity} {item.name}
+                </Typography>
+                <Typography>{(item.price * item.quantity).toLocaleString()}đ</Typography>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => onRemoveItem(item.id)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ))}
           </Box>
-        ))}
+        )}
+
+        {confirmedItems.length === 0 && pendingItems.length === 0 && (
+          <Typography py={3} textAlign="center" color="text.secondary">Chưa có món nào</Typography>
+        )}
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography fontWeight="bold">
-          Tổng cộng: {total.toLocaleString()}đ
-        </Typography>
+        <Box display="flex" justifyContent="space-between" mb={3}>
+          <Typography variant="h6" fontWeight="bold">Tổng cộng:</Typography>
+          <Typography variant="h6" color="error" fontWeight="bold">
+            {total.toLocaleString()}đ
+          </Typography>
+        </Box>
 
-        <Box mt={2} display="flex" gap={1}>
-          <Button fullWidth variant="outlined" onClick={onClose}>
-            Đóng
+        <Box display="flex" gap={2}>
+          <Button fullWidth variant="outlined" onClick={onClose} sx={{ py: 1.5 }}>
+            Quay lại
           </Button>
-
+          
+          {/* Nút này chỉ sáng khi có món mới để gửi */}
           <Button
             fullWidth
             variant="contained"
+            color="success"
             onClick={onSend}
-            disabled={items.length === 0}
+            disabled={pendingItems.length === 0}
+            sx={{ py: 1.5, fontWeight: 'bold' }}
           >
-            Xác nhận
+            {confirmedItems.length > 0 ? 'Gửi thêm món' : 'Xác nhận đặt'}
           </Button>
         </Box>
       </Box>

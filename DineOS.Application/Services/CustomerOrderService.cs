@@ -14,11 +14,11 @@ namespace DineOS.Application.Services
     public class CustomerOrderService : ICustomerOrderService
     {
         private readonly IApplicationDbContext _context;
-        private readonly IHubContext<Hub> _hubContext;
-        public CustomerOrderService(IApplicationDbContext context, IHubContext<Hub> hubContext)
+        private readonly IRealtimeService _realtime;
+        public CustomerOrderService(IApplicationDbContext context, IRealtimeService realtime)
         {
             _context = context;
-            _hubContext = hubContext;
+            _realtime = realtime;
         }
 
         public async Task<OrderResponse?> GetByTableAsync(Guid tableId)
@@ -45,11 +45,14 @@ namespace DineOS.Application.Services
             var table = await _context.Tables.FindAsync(request.TableId);
             if (table == null)
                 throw new Exception("Table not found");
+            bool isNewOrder = false;
 
             // 🔥 LẤY ORDER NẾU ĐÃ CÓ
             var order = await _context.Orders
                 .Where(o => o.TableId == request.TableId && o.IsActive)
                 .Include(o => o.OrderItems)
+                    .ThenInclude(i => i.MenuItem)
+                .Include(o => o.Table)
                 .FirstOrDefaultAsync();
 
             // 🔥 CHƯA CÓ → CREATE
@@ -59,6 +62,7 @@ namespace DineOS.Application.Services
 
                 order = table.CreateOrder();
                 _context.Orders.Add(order);
+                isNewOrder = true;
             }
 
             // 🔥 LOAD MENU ITEMS 1 LẦN
@@ -86,12 +90,16 @@ namespace DineOS.Application.Services
             await _context.SaveChangesAsync();
             var response = Map(order);
 
-            // NEW ORDER → push riêng
-            await _hubContext.Clients.All.SendAsync("NewOrder", response);
-
+            // 🔥 CHỈ GỬI CHO STAFF: Thông báo có món mới để hiện Notification
+            if (isNewOrder)
+            {
+                await _realtime.BroadcastOrderCreated(response);
+            }
+            else
+            {
+                await _realtime.BroadcastOrderUpdated(response);
+            }
             return response;
-
-            return Map(order);
         }
 
         // =========================

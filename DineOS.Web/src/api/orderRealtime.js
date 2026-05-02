@@ -18,7 +18,9 @@ export const startOrderRealtime = async (onNewOrder, onUpdateOrder) => {
 
   if (!connection) {
     connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://192.168.1.161:5010/orderHub")
+      .withUrl("https://your-api.onrender.com/orderHub", {
+        accessTokenFactory: () => token
+      })
       .withAutomaticReconnect([0, 2000, 5000, 10000])
       .build();
 

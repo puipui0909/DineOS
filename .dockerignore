@@ -1,0 +1,45 @@
+# ===== GIT =====
+.git
+.gitignore
+.gitattributes
+
+# ===== NODE / FRONTEND =====
+node_modules
+frontend/node_modules
+dist
+build
+frontend/dist
+frontend/build
+npm-debug.log
+yarn-error.log
+
+# ===== ENV =====
+.env
+.env.*
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE =====
+.vscode
+.idea
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ===== .NET BUILD =====
+bin/
+obj/
+
+# ===== TEST / CACHE =====
+coverage
+*.log
+
+# ===== DOCKER =====
+Dockerfile*
+docker-compose*
+
+# ===== OTHER =====
+*.md

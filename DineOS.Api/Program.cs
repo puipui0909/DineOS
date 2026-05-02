@@ -130,9 +130,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
         {
             policy.WithOrigins(
-                    "https://dineos.vercel.app"
-                    //"http://localhost:5173",
-                    //"http://192.168.1.161:5173"
+                    "https://dineos.vercel.app",
+                    "http://localhost:5173",
+                    "http://192.168.1.161:5173"
                     )
                   .AllowAnyHeader()
                   .AllowAnyMethod()
@@ -171,9 +171,16 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DineOSDbContext>();
-    if (!context.Tables.Any()) // hoặc entity bất kỳ
+    try
     {
-        await DataSeeder.SeedAsync(context);
+        if (!context.Tables.Any())
+        {
+            await DataSeeder.SeedAsync(context);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
     }
 }
 

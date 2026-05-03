@@ -130,7 +130,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
         {
             policy.WithOrigins(
-                    "https://dineos.vercel.app",
+                    "https://dine-os-red.vercel.app",
                     "http://localhost:5173",
                     "http://192.168.1.161:5173"
                     )

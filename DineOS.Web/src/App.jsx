@@ -14,7 +14,7 @@ import MainLayout from './pages/admin/MainLayout';
 import OrderRailPage from './pages/admin/order/rail/OrderRailPage';
 import OrderPage from './pages/admin/order/OrderPage';
 import OrderHistoryPage from './pages/admin/history/OrderHistoryPage';
-import CustomerPage from "./pages/customer/CustomerPage";
+import CustomerPage from "./pages/Customer/CustomerPage";
 
 function App() {
   return (

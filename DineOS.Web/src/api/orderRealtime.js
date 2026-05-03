@@ -18,9 +18,7 @@ export const startOrderRealtime = async (onNewOrder, onUpdateOrder) => {
 
   if (!connection) {
     connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://your-api.onrender.com/orderHub", {
-        accessTokenFactory: () => token
-      })
+      .withUrl(`${import.meta.env.VITE_API_BASE_URL.replace("/api","")}/orderHub`)
       .withAutomaticReconnect([0, 2000, 5000, 10000])
       .build();
 

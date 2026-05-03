@@ -6,7 +6,7 @@
 
 # Node / React
 node_modules/
-.env
+#.env
 dist/
 
 # Visual Studio

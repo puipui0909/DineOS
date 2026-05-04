@@ -49,18 +49,22 @@ public class AiService : IAiService
             - Phân tích yêu cầu khách (từ khóa, loại món, khẩu vị).
             - Chọn tối đa 3 món phù hợp nhất từ menu.
             Tiêu chí chọn:
-            - Ưu tiên tên món chứa từ khóa
-            - Ưu tiên mô tả liên quan
-            - Nếu không rõ → chọn món phổ biến, dễ ăn
+            - Ưu tiên món có mô tả liên quan đến yêu cầu (ví dụ: giòn, cay, ngọt, mát)
+            - Không cần từ khóa phải nằm trong tên món
+            - Nếu không chắc, hãy chọn món phổ biến phù hợp nhất
+            - KHÔNG được trả về mảng rỗng
+            - LUÔN chọn ít nhất 1 món từ menu
             Quy tắc:
             - CHỈ chọn món có trong menu
             - KHÔNG tự tạo món mới
             - KHÔNG chọn quá 3 món
+            - id phải CHÍNH XÁC trùng với id trong menu JSON
+            - KHÔNG được tự tạo id
             Trường hợp KHÔNG tìm được món phù hợp:
             - VẪN phải trả về 1 mảng JSON
             - Nhưng chứa DUY NHẤT 1 phần tử:
               {{
-                ""id"": 0,
+                ""id"": ""00000000-0000-0000-0000-000000000000"",
                 ""reason"": ""Không tìm thấy món phù hợp với yêu cầu: {userInput}. Gợi ý: thử món nướng, lẩu hoặc món phổ biến.""
               }}
             Định dạng trả về (BẮT BUỘC):
@@ -154,6 +158,9 @@ public class AiService : IAiService
                     }) ?? new List<AiSuggestionDto>();
                     Console.WriteLine("==== PARSED SUGGESTIONS ====");
                     Console.WriteLine(JsonSerializer.Serialize(suggestions));
+                    suggestions = suggestions
+                        .Where(x => x.Id != Guid.Empty)
+                        .ToList();
                 }
                 catch (Exception ex)
                 {
@@ -166,7 +173,34 @@ public class AiService : IAiService
             var ids = suggestions.Select(x => x.Id).ToList();
             Console.WriteLine("==== IDS FROM AI ====");
             Console.WriteLine(string.Join(", ", suggestions.Select(x => x.Id)));
-            var items = await _context.MenuItems.Where(x => ids.Contains(x.Id)).ToListAsync();
+
+            var items = await _context.MenuItems
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+
+            // 🔥 FIX: nếu AI trả id sai hoặc rỗng → fallback
+            if (!items.Any())
+            {
+                Console.WriteLine("⚠️ AI trả id không hợp lệ → fallback theo keyword");
+
+                items = await _context.MenuItems
+                    .Where(x => x.IsAvailable &&
+                           (x.Name.Contains(userInput) ||
+                            x.Description.Contains(userInput)))
+                    .Take(3)
+                    .ToListAsync();
+            }
+
+            // 🔥 FIX tiếp: vẫn không có → lấy món phổ biến
+            if (!items.Any())
+            {
+                Console.WriteLine("⚠️ Không match keyword → fallback phổ biến");
+
+                items = await _context.MenuItems
+                    .Where(x => x.IsAvailable)
+                    .Take(3)
+                    .ToListAsync();
+            }
 
             return items.Select(item =>
             {

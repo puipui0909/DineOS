@@ -18,6 +18,7 @@ namespace DineOS.Api.Controllers
         [HttpPost("suggest")]
         public async Task<IActionResult> Suggest([FromBody] AiRequest request)
         {
+            Console.WriteLine("===== API HIT /api/ai/suggest =====");
             var result = await _aiService.GetSuggestion(request.Message);
             return Ok(result);
         }

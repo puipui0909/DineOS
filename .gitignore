@@ -9,5 +9,8 @@ node_modules/
 #.env
 dist/
 
+# Ignore ONLY backend env
+dineos.api/.env
+
 # Visual Studio
 .vs/

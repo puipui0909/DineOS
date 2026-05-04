@@ -16,7 +16,8 @@ public class AiService : IAiService
     {
         _context = context;
         _httpClient = httpClient;
-        _apiKey = config["Gemini:ApiKey"];
+        _apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")
+          ?? throw new Exception("Missing GEMINI_API_KEY");
 
         Console.WriteLine($"==== CHECK API KEY: {(!string.IsNullOrEmpty(_apiKey) ? "Đã đọc được" : "TRỐNG RỖNG!")} ====");
         if (!string.IsNullOrEmpty(_apiKey))

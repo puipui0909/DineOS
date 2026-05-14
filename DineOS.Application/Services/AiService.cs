@@ -44,19 +44,13 @@ public class AiService : IAiService
         input = input.ToLower();
 
         if (input.Contains("món nước"))
-            input += " bún phở hủ tiếu mì nước soup canh";
+            input += " bún phở mì hủ tiếu soup canh";
 
         if (input.Contains("ít cay"))
-            input += " mild không cay";
+            input += " không cay cay nhẹ";
 
-        if (input.Contains("ngọt"))
-            input += " dessert sweet";
-
-        if (input.Contains("nhẹ bụng"))
-            input += " healthy thanh đạm";
-
-        if (input.Contains("thanh mát"))
-            input += " giải khát refresh";
+        if (input.Contains("thanh đạm"))
+            input += " nhẹ bụng";
 
         return input;
     }
@@ -79,7 +73,22 @@ public class AiService : IAiService
             Menu (JSON):
             {menuJson}
             Yêu cầu của khách:
-            ""{normalizedInput}""
+            ""{userInput}""
+            Khách có thể mô tả món ăn bằng ngôn ngữ tự nhiên như:
+            - món dễ ăn
+            - món thanh đạm
+            - món hợp trời nóng
+            - món cay nhẹ
+            - món nước
+            - món ăn vặt
+            - món no bụng
+
+            Hãy suy luận món phù hợp nhất dựa trên:
+            - tên món
+            - mô tả món
+            - khẩu vị
+            - loại món
+
             Nhiệm vụ:
             - Phân tích yêu cầu khách (từ khóa, loại món, khẩu vị).
             - Chọn tối đa 3 món phù hợp nhất từ menu.
@@ -238,12 +247,7 @@ public class AiService : IAiService
             // 🔥 FIX tiếp: vẫn không có → lấy món phổ biến
             if (!items.Any())
             {
-                Console.WriteLine("⚠️ Không match keyword → fallback phổ biến");
-
-                items = await _context.MenuItems
-                    .Where(x => x.IsAvailable)
-                    .Take(3)
-                    .ToListAsync();
+                return NoResult(userInput);
             }
 
             return items.Select(item =>

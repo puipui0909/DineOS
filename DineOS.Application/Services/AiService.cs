@@ -26,6 +26,41 @@ public class AiService : IAiService
         }
     }
 
+    private List<AiSuggestionResponse> NoResult(string userInput)
+    {
+        return new List<AiSuggestionResponse>
+        {
+            new AiSuggestionResponse
+            {
+                Id = Guid.Empty,
+                Name = "Không tìm thấy món phù hợp",
+                Description = "",
+                Reason = $"Hiện chưa tìm thấy món phù hợp với yêu cầu \"{userInput}\". Hãy thử mô tả khác như món cay nhẹ, món nước hoặc món ngọt."
+            }
+        };
+    }
+    private string NormalizeQuery(string input)
+    {
+        input = input.ToLower();
+
+        if (input.Contains("món nước"))
+            input += " bún phở hủ tiếu mì nước soup canh";
+
+        if (input.Contains("ít cay"))
+            input += " mild không cay";
+
+        if (input.Contains("ngọt"))
+            input += " dessert sweet";
+
+        if (input.Contains("nhẹ bụng"))
+            input += " healthy thanh đạm";
+
+        if (input.Contains("thanh mát"))
+            input += " giải khát refresh";
+
+        return input;
+    }
+
     public async Task<List<AiSuggestionResponse>> GetSuggestion(string userInput)
     {
         try
@@ -37,14 +72,14 @@ public class AiService : IAiService
                 .ToListAsync();
 
             var menuJson = JsonSerializer.Serialize(menu);
-
+            var normalizedInput = NormalizeQuery(userInput);
             // 2. Prompt: Ép AI chỉ trả về JSON
             var prompt = $@"
             Bạn là AI tư vấn món ăn cho hệ thống nhà hàng DineOS.
             Menu (JSON):
             {menuJson}
             Yêu cầu của khách:
-            ""{userInput}""
+            ""{normalizedInput}""
             Nhiệm vụ:
             - Phân tích yêu cầu khách (từ khóa, loại món, khẩu vị).
             - Chọn tối đa 3 món phù hợp nhất từ menu.
@@ -72,7 +107,10 @@ public class AiService : IAiService
             - KHÔNG thêm text ngoài JSON
             - Format:
             [
-              {{ ""id"": 1, ""reason"": ""..."" }}
+                {{
+                ""id"": ""11111111-1111-1111-1111-111111111111"",
+                ""reason"": ""...""
+                }}
             ]
             ";
 
@@ -97,14 +135,14 @@ public class AiService : IAiService
             catch (Exception ex)
             {
                 Console.WriteLine("Gemini CALL ERROR: " + ex.Message);
-                return new List<AiSuggestionResponse>();
+                return NoResult(userInput);
             }
 
             if (!httpResponse.IsSuccessStatusCode)
             {
                 var error = await httpResponse.Content.ReadAsStringAsync();
                 Console.WriteLine($"Gemini Error: {error}");
-                return new List<AiSuggestionResponse>();
+                return NoResult(userInput);
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
@@ -117,7 +155,7 @@ public class AiService : IAiService
             catch (Exception ex)
             {
                 Console.WriteLine("JSON ROOT PARSE ERROR: " + ex.Message);
-                return new List<AiSuggestionResponse>();
+                return NoResult(userInput);
             }
 
             // 5. Trích xuất text từ response của Google
@@ -137,7 +175,7 @@ public class AiService : IAiService
             catch (Exception ex)
             {
                 Console.WriteLine("EXTRACT TEXT ERROR: " + ex.Message);
-                return new List<AiSuggestionResponse>();
+                return NoResult(userInput);
             }
 
             // 6. Xử lý chuỗi JSON an toàn (Tránh lỗi nếu AI trả về kèm lời dẫn)
@@ -156,16 +194,17 @@ public class AiService : IAiService
                     {
                         PropertyNameCaseInsensitive = true
                     }) ?? new List<AiSuggestionDto>();
+                    if (suggestions.Any(x => x.Id == Guid.Empty))
+                    {
+                        return NoResult(userInput);
+                    }
                     Console.WriteLine("==== PARSED SUGGESTIONS ====");
                     Console.WriteLine(JsonSerializer.Serialize(suggestions));
-                    suggestions = suggestions
-                        .Where(x => x.Id != Guid.Empty)
-                        .ToList();
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("PARSE JSON ERROR: " + ex.Message);
-                    return new List<AiSuggestionResponse>();
+                    return NoResult(userInput);
                 }
             }
 
@@ -182,11 +221,16 @@ public class AiService : IAiService
             if (!items.Any())
             {
                 Console.WriteLine("⚠️ AI trả id không hợp lệ → fallback theo keyword");
+                var keywords = normalizedInput
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(x => x.Length > 2)
+                .ToList();
 
                 items = await _context.MenuItems
                     .Where(x => x.IsAvailable &&
-                           (x.Name.Contains(userInput) ||
-                            x.Description.Contains(userInput)))
+                        keywords.Any(k =>
+                            x.Name.ToLower().Contains(k) ||
+                            x.Description.ToLower().Contains(k)))
                     .Take(3)
                     .ToListAsync();
             }
@@ -235,4 +279,5 @@ public class AiService : IAiService
             }).ToList();
         }
     }
+
 }

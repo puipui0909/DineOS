@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -14,6 +14,7 @@ export default function ChatBox({ onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -43,6 +44,12 @@ export default function ChatBox({ onClose }) {
     setInput('');
     setLoading(false);
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }, [messages, loading]);
 
   return (
     <Box
@@ -77,6 +84,42 @@ export default function ChatBox({ onClose }) {
           ✕
         </Button>
       </Box>
+      {messages.length === 0 && (
+        <Box
+          sx={{
+            backgroundColor: '#f5f5f5',
+            borderRadius: 2,
+            p: 1,
+            mb: 1
+          }}
+        >
+          <Typography variant="caption" fontWeight="bold">
+            AI hỗ trợ gợi ý món đơn giản:
+          </Typography>
+
+          <Box
+            display="flex"
+            gap={1}
+            flexWrap="wrap"
+            mt={1}
+          >
+            {[
+              'món cay nhẹ',
+              'món nước ít cay',
+              'món ngọt',
+              'món thanh mát'
+            ].map((text) => (
+              <Chip
+                key={text}
+                label={text}
+                size="small"
+                clickable
+                onClick={() => setInput(text)}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
       {/* Chat content */}
       <Box sx={{ flex: 1, overflowY: 'auto', mb: 1 }}>
         {messages.map((msg, index) => (
@@ -133,6 +176,7 @@ export default function ChatBox({ onClose }) {
         {loading && (
           <Typography>Đang gợi ý...</Typography>
         )}
+        <div ref={messagesEndRef} />
       </Box>
 
       {/* Input */}

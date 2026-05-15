@@ -43,14 +43,26 @@ public class AiService : IAiService
     {
         input = input.ToLower();
 
-        if (input.Contains("món nước"))
-            input += " bún phở mì hủ tiếu soup canh";
+        var mappings = new Dictionary<string, string>
+    {
+        { "món nước", "bún phở mì hủ tiếu soup canh lẩu" },
+        { "ít cay", "không cay cay nhẹ nhẹ vị" },
+        { "thanh đạm", "nhẹ bụng ít dầu ít mỡ healthy" },
+        { "ăn vặt", "chiên snack khoai gà rán xúc xích" },
+        { "no bụng", "cơm mì bún phở đầy đặn" },
+        { "trời nóng", "mát lạnh thanh mát nước uống" },
+        { "healthy", "ít dầu salad rau" },
+        { "béo", "phô mai kem bơ" },
+        { "ngọt", "dessert bánh trà sữa" },
+        { "cay", "ớt cay nóng spicy" },
+        { "best seller", "phổ biến bán chạy nổi tiếng" }
+    };
 
-        if (input.Contains("ít cay"))
-            input += " không cay cay nhẹ";
-
-        if (input.Contains("thanh đạm"))
-            input += " nhẹ bụng";
+        foreach (var map in mappings)
+        {
+            if (input.Contains(map.Key))
+                input += " " + map.Value;
+        }
 
         return input;
     }
@@ -61,9 +73,17 @@ public class AiService : IAiService
         {
             // 1. Lấy menu từ Database
             var menu = await _context.MenuItems
-                .Where(x => x.IsAvailable)
-                .Select(x => new { id = x.Id, name = x.Name, description = x.Description })
-                .ToListAsync();
+            .Where(x => x.IsAvailable)
+            .Select(x => new
+            {
+                id = x.Id,
+                name = x.Name,
+                description = x.Description,
+
+                soldCount = x.OrderItems
+                    .Sum(oi => (int?)oi.Quantity) ?? 0
+            })
+            .ToListAsync();
 
             var menuJson = JsonSerializer.Serialize(menu);
             var normalizedInput = NormalizeQuery(userInput);
@@ -74,14 +94,26 @@ public class AiService : IAiService
             {menuJson}
             Yêu cầu của khách:
             ""{userInput}""
+            Yêu cầu đã chuẩn hóa:
+            ""{normalizedInput}""
             Khách có thể mô tả món ăn bằng ngôn ngữ tự nhiên như:
+            - ăn gì cũng được
+            - món đang hot
+            - món bán chạy
+            - muốn ăn nhẹ
+            - đang đói
+            - muốn ăn chill
+            - trời lạnh nên ăn gì
+            - món hợp đi nhóm
+            - món cho 1 người
             - món dễ ăn
-            - món thanh đạm
-            - món hợp trời nóng
-            - món cay nhẹ
-            - món nước
-            - món ăn vặt
-            - món no bụng
+            - món trẻ em thích
+            - món uống kèm
+            - món ăn tối
+            - món ăn sáng
+
+            Hãy hiểu ý nghĩa và cảm xúc của câu nói,
+            không chỉ tìm keyword chính xác.
 
             Hãy suy luận món phù hợp nhất dựa trên:
             - tên món
@@ -98,6 +130,7 @@ public class AiService : IAiService
             - Nếu không chắc, hãy chọn món phổ biến phù hợp nhất
             - KHÔNG được trả về mảng rỗng
             - LUÔN chọn ít nhất 1 món từ menu
+            - Nếu khách hỏi món ngon, món hot, best seller, hãy ưu tiên món có soldCount cao
             Quy tắc:
             - CHỈ chọn món có trong menu
             - KHÔNG tự tạo món mới

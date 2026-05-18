@@ -83,7 +83,7 @@ const MainLayout = () => {
       }
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch(() => {});
-      toast.info(`Bàn ${tableName} vừa thêm món mới!`);
+      toast.info(`${tableName} vừa thêm món mới!`);
     }
     orderItemCountRef.current[orderId] = newCount;
   }, [location.pathname]);
@@ -96,7 +96,7 @@ const MainLayout = () => {
         setNotifications(prev => [{ id: tableId, tableId, tableName, time: new Date(), isNewUpdate: false }, ...prev]);
     }
     audioRef.current.play().catch(() => {});
-    toast.info(`Bàn ${tableName} vừa tạo đơn mới`);
+    toast.info(`${tableName} vừa tạo đơn mới`);
   }, [location.pathname]);
   const clearNotificationsByTable = useCallback((tableId) => {
     // 1. Xóa trong Menu (State)
@@ -183,7 +183,7 @@ const MainLayout = () => {
                     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
                   >
                     <Typography variant="body2">
-                      Khách tại <b>Bàn {noti.tableName}</b> đã đặt món.
+                      Khách tại <b>{noti.tableName}</b> đã đặt món.
                     </Typography>
                     <Typography variant="caption" color="primary">
                       {noti.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

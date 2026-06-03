@@ -88,7 +88,7 @@ npm start
 3. Log in with your account and access features based on your assigned role.
 4. Start managing your restaurant operations
 
-For detailed usage instructions, please refer to the [documentation](./docs) or visit the [live website](https://dine-os-seven.vercel.app).
+For detailed usage instructions, please refer to the [documentation](./docs) or visit the [live website]((https://dine-os-red.vercel.app/)).
 
 ## 📝 License
 

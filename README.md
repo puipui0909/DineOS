@@ -3,7 +3,7 @@
 A modern restaurant management system built with C# and JavaScript.
 
 [![GitHub](https://img.shields.io/badge/GitHub-puipui0909%2FDineOS-blue?logo=github)](https://github.com/puipui0909/DineOS)
-[![Website](https://img.shields.io/badge/Website-dine--os--seven.vercel.app-success)](https://dine-os-red.vercel.app/))
+[![Website](https://img.shields.io/badge/Website-dine--os--seven.vercel.app-success)](https://dine-os-red.vercel.app/)
 [![Language](https://img.shields.io/badge/Language-C%23%20%7C%20JavaScript-orange)](#-tech-stack)
 
 ## 📋 Overview

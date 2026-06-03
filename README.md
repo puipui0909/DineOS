@@ -96,7 +96,7 @@ This project is currently unlicensed. Please check back for license information 
 
 - **Author**: [puipui0909](https://github.com/puipui0909)
 - **Repository**: [DineOS](https://github.com/puipui0909/DineOS)
-- **Website**: [https://dine-os-seven.vercel.app](https://dine-os-red.vercel.app)
+- **Website**: [https://dine-os-red.vercel.app](https://dine-os-red.vercel.app)
 
 ---
 

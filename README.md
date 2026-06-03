@@ -8,26 +8,25 @@ A modern restaurant management system built with C# and JavaScript.
 
 ## 📋 Overview
 
-DineOS is a comprehensive restaurant management system designed to streamline operations including order management, table reservations, inventory tracking, and staff management. The application provides an intuitive interface for restaurant staff and managers to efficiently handle daily operations.
+DineOS is a restaurant management system built with ASP.NET Core and JavaScript. It provides features for managing menus, tables, orders, payments, and user roles through a web-based interface.
 
 ## ✨ Features
 
 - **Order Management** - Efficiently process and track restaurant orders
 - **Table Reservations** - Manage table bookings and reservations
 - **Menu Management** - Organize and update restaurant menu items
-- **Inventory Tracking** - Monitor stock and supplies
-- **Staff Management** - Manage employee schedules and roles
 - **Reporting & Analytics** - Generate business insights and reports
 - **User Authentication** - Secure login system with role-based access
 - **Responsive Design** - Works seamlessly on desktop and mobile devices
 
 ## 🚀 Tech Stack
 
-- **Backend**: C# (.NET Framework)
+- **Backend**: ASP.NET Core Web API
 - **Frontend**: JavaScript
-- **Styling**: CSS
-- **Hosting**: Vercel
-- **Version Control**: Git & GitHub
+- **Database**: MySQL
+- **Authentication**: JWT
+- **AI Integration**: Gemini API
+- **Deployment**: Render & Vercel
 
 ### Language Composition
 - C#: 60.9%
@@ -38,8 +37,8 @@ DineOS is a comprehensive restaurant management system designed to streamline op
 ## 📦 Installation
 
 ### Prerequisites
-- .NET Framework (for C# backend)
-- Node.js and npm (for JavaScript frontend)
+- .NET SDK 8.0
+- Node.js and npm
 - Git
 
 ### Steps
@@ -64,9 +63,13 @@ npm install
 4. **Configure environment variables**
 Create a `.env` file with your configuration:
 ```
-DATABASE_URL=your_database_url
-API_KEY=your_api_key
-# Add other required variables
+ConnectionStrings__DefaultConnection=
+
+Jwt__Key=
+Jwt__Issuer=
+Jwt__Audience=
+
+GEMINI_API_KEY=
 ```
 
 5. **Run the application**
@@ -82,39 +85,14 @@ npm start
 
 1. Open your browser and navigate to the application
 2. Log in with your credentials
-3. Select your role (Manager, Staff, etc.)
+3. Log in with your account and access features based on your assigned role.
 4. Start managing your restaurant operations
 
 For detailed usage instructions, please refer to the [documentation](./docs) or visit the [live website](https://dine-os-seven.vercel.app).
 
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## 📝 License
 
 This project is currently unlicensed. Please check back for license information or contact the repository owner.
-
-## 🐛 Reporting Issues
-
-Found a bug? Please [open an issue](https://github.com/puipui0909/DineOS/issues) on GitHub with:
-- Clear description of the problem
-- Steps to reproduce
-- Expected vs actual behavior
-- Screenshots (if applicable)
-
-## 💡 Support
-
-For questions or support:
-- Open an issue on GitHub
-- Check existing discussions
-- Visit the [live website](https://dine-os-seven.vercel.app)
 
 ## 📞 Contact
 
@@ -123,5 +101,10 @@ For questions or support:
 - **Website**: [https://dine-os-seven.vercel.app](https://dine-os-seven.vercel.app)
 
 ---
+
+## Screenshots
+
+
+
 
 **Happy Restaurant Managing! 🍽️**

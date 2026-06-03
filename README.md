@@ -104,7 +104,22 @@ This project is currently unlicensed. Please check back for license information 
 
 ## Screenshots
 
+<h3>Dashboard</h3>
+<p align="center">
+  <img src="screenshots/dashboard.png" width="900">
+</p>
 
+<h3>Core Features</h3>
+
+<p align="center">
+  <img src="screenshots/order.png" width="48%">
+  <img src="screenshots/table.png" width="48%">
+</p>
+
+<p align="center">
+  <img src="screenshots/menu.png" width="48%">
+  <img src="screenshots/ordermobile.png" width="48%">
+</p>
 
 
 **Happy Restaurant Managing! 🍽️**

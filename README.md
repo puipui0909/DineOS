@@ -88,8 +88,6 @@ npm start
 3. Log in with your account and access features based on your assigned role.
 4. Start managing your restaurant operations
 
-For detailed usage instructions, please refer to the [documentation](./docs) or visit the [live website]((https://dine-os-red.vercel.app/)).
-
 ## 📝 License
 
 This project is currently unlicensed. Please check back for license information or contact the repository owner.
@@ -98,7 +96,7 @@ This project is currently unlicensed. Please check back for license information 
 
 - **Author**: [puipui0909](https://github.com/puipui0909)
 - **Repository**: [DineOS](https://github.com/puipui0909/DineOS)
-- **Website**: [https://dine-os-seven.vercel.app](https://dine-os-seven.vercel.app)
+- **Website**: [https://dine-os-seven.vercel.app](https://dine-os-red.vercel.app)
 
 ---
 
